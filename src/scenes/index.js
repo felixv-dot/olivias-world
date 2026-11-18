@@ -1,0 +1,20 @@
+// All places: Sunny Planet and Winter Planet.
+import { MAP } from './map.js';
+import { HOME } from './home.js';
+import { CAFE } from './cafe.js';
+import { BEACH } from './beach.js';
+import { PARK } from './park.js';
+import { BOUTIQUE } from './boutique.js';
+import { GYM } from './gym.js';
+import { GAMES } from './games.js';
+import { WINTER_MAP } from './winter-map.js';
+import { CABIN } from './cabin.js';
+import { MARKET } from './market.js';
+import { RINK } from './rink.js';
+import { HILL } from './hill.js';
+import { LOOKOUT } from './lookout.js';
+
+export const SCENES = {
+  sunny: MAP, home: HOME, cafe: CAFE, beach: BEACH, park: PARK, boutique: BOUTIQUE, gym: GYM, games: GAMES,
+  winter: WINTER_MAP, cabin: CABIN, market: MARKET, rink: RINK, hill: HILL, lookout: LOOKOUT,
+};
