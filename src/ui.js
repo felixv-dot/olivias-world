@@ -1,7 +1,7 @@
 // Small shared UI pieces: elements, top bar, star counter, weather toggle, rain.
 import { state, session, save } from './state.js';
 
-export const TOTAL_STARS = 24;
+export const TOTAL_STARS = 38;
 // Phones: fewer particles, and a few layout tweaks.
 export const SMALL = Math.min(window.innerWidth, window.innerHeight) < 520;
 

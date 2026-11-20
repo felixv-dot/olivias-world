@@ -2,17 +2,19 @@
 import { INK, O, svg, label, text, winterSky, mountains, pine, stringLights, starPath } from './common.js';
 import { CLIMATES } from '../ui.js';
 
-const bg = (w) => svg(1600, 900, `
-  ${winterSky(w, 900, 'wmap')}
-  ${mountains(470, '#D6DCF0')}${mountains(520, '#E4E8F6').replace(/translate/g, '')}
-  <path d="M-10 470 Q400 420 800 450 T1620 440 V910 H-10 Z" fill="#F4F8FF"/>
-  <path d="M-10 520 Q500 480 900 520 T1620 500" fill="none" stroke="#DDE6F5" stroke-width="30"/>
+const WW = 2600;
+const bg = (w) => svg(WW, 900, `
+  ${winterSky(w, 900, 'wmap', WW)}
+  ${mountains(470, '#D6DCF0')}${mountains(470, '#D6DCF0', 1500)}${mountains(520, '#E4E8F6', 700)}
+  <path d="M-10 470 Q400 420 800 450 T1600 440 T2610 450 V910 H-10 Z" fill="#F4F8FF"/>
+  <path d="M-10 520 Q500 480 900 520 T1800 500 T2610 520" fill="none" stroke="#DDE6F5" stroke-width="30"/>
   <ellipse cx="720" cy="740" rx="420" ry="120" fill="#CFEAF7" stroke="${INK}" stroke-width="3"/>
   <path d="M420 720 Q520 700 600 730 M760 770 Q860 750 960 780 M640 790 L700 780" stroke="#fff" stroke-width="6" fill="none" opacity=".8" stroke-linecap="round"/>
-  <g fill="#DCE6F4">${Array.from({ length: 22 }, (_, i) => `<ellipse cx="${80 + ((i * 211) % 1460)}" cy="${500 + ((i * 97) % 380)}" rx="${26 + (i % 3) * 8}" ry="7"/>`).join('')}</g>
+  <g fill="#DCE6F4">${Array.from({ length: 36 }, (_, i) => `<ellipse cx="${80 + ((i * 211) % 2460)}" cy="${500 + ((i * 97) % 380)}" rx="${26 + (i % 3) * 8}" ry="7"/>`).join('')}</g>
   <g stroke="#BFD3EC" stroke-width="16" stroke-linecap="round" stroke-dasharray="2 34" fill="none">
-    <path d="M290 520 Q520 560 720 520 Q960 480 1200 460"/><path d="M640 560 Q900 600 1120 640"/></g>
-  ${pine(60, 470, 0.9)}${pine(1560, 500, 0.9)}${pine(1000, 380, 0.55)}${pine(440, 430, 0.5)}${pine(1460, 640, 0.7)}${pine(120, 680, 0.75)}`);
+    <path d="M290 520 Q520 560 720 520 Q960 480 1200 460 Q1600 470 2100 520"/><path d="M640 560 Q900 600 1120 640 Q1600 700 2150 660"/></g>
+  ${pine(60, 470, 0.9)}${pine(1560, 640, 0.7)}${pine(1000, 380, 0.55)}${pine(440, 430, 0.5)}${pine(1460, 470, 0.6)}${pine(120, 680, 0.75)}
+  ${pine(2520, 480, 0.9)}${pine(2400, 700, 0.7)}${pine(1960, 400, 0.5)}`);
 
 const cabin = () => svg(300, 300, `
   <g class="smoke"><circle cx="226" cy="30" r="12" fill="#fff" opacity=".8"/><circle cx="236" cy="12" r="9" fill="#fff" opacity=".6"/></g>
@@ -63,11 +65,38 @@ const hill = () => svg(400, 330, `
   <circle ${O} cx="300" cy="230" r="24" fill="#fff"/><circle ${O} cx="300" cy="190" r="17" fill="#fff"/><path d="M300 190 l14 3 -14 3 z" fill="#F0A060"/>
   ${label(200, 304, 'Snow Hill', 170)}`);
 
+const bakery = () => svg(300, 300, `
+  <g class="smoke"><circle cx="216" cy="34" r="12" fill="#fff" opacity=".8"/><circle cx="226" cy="16" r="9" fill="#fff" opacity=".6"/></g>
+  <rect ${O} x="198" y="52" width="32" height="56" fill="#C9A57C"/>
+  <rect ${O} x="44" y="116" width="212" height="136" rx="6" fill="#FBEFB4"/>
+  <path ${O} d="M24 124 L150 40 L276 124 Z" fill="#E58F6A"/><path d="M24 124 L150 40 L276 124 L260 124 L150 58 L40 124 Z" fill="#fff"/>
+  <rect ${O} x="60" y="150" width="110" height="80" rx="8" fill="#FFE9A0"/>
+  <path d="M82 206 Q100 180 118 206 Z M126 206 Q142 186 156 206 Z" fill="#E0B07A" stroke="#4A3B5C" stroke-width="2"/>
+  <rect ${O} x="186" y="160" width="52" height="92" rx="10" fill="#7A64B0"/>
+  ${label(150, 280, 'Bakery', 140)}`);
+
+const workshop = () => svg(300, 300, `
+  <rect ${O} x="40" y="110" width="220" height="142" rx="6" fill="#C9B8F2"/>
+  <path ${O} d="M20 118 L150 36 L280 118 Z" fill="#3CC7B8"/><path d="M20 118 L150 36 L280 118 L264 118 L150 54 L36 118 Z" fill="#fff"/>
+  <circle ${O} cx="150" cy="86" r="16" fill="#F5DE7A"/><path d="M150 74 V98 M138 86 H162" stroke="#4A3B5C" stroke-width="3"/>
+  <rect ${O} x="58" y="146" width="104" height="80" rx="8" fill="#FFE9A0"/>
+  <rect ${O} x="74" y="180" width="26" height="30" rx="4" fill="#E58F6A"/><path d="M87 180 V210 M74 195 H100" stroke="#fff" stroke-width="3"/>
+  <rect ${O} x="112" y="172" width="34" height="38" rx="6" fill="#8FC3F0"/>
+  <rect ${O} x="180" y="152" width="58" height="100" rx="10" fill="#7A64B0"/>
+  ${label(150, 280, 'Toy Workshop', 190)}`);
+
+const springs = () => svg(440, 320, `
+  <path ${O} d="M10 280 Q220 120 430 280 Z" fill="#F4F8FF"/>
+  <ellipse ${O} cx="220" cy="236" rx="160" ry="46" fill="#9EDDD4"/><ellipse cx="220" cy="230" rx="130" ry="30" fill="#BFF0EA"/>
+  <g class="smoke">${[150, 220, 290].map((x) => `<path d="M${x} 210 q-16 -30 0 -60 q16 -30 0 -60" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round" opacity=".8"/>`).join('')}</g>
+  <path d="M30 40 L410 10" stroke="${INK}" stroke-width="3"/><path d="M300 18 V60" stroke="${INK}" stroke-width="3"/><rect ${O} x="282" y="58" width="40" height="26" rx="6" fill="#E58F6A"/>
+  ${label(220, 300, 'Hot Springs', 180)}`);
+
 const goTo = (id) => (it, api) => { it.el.classList.add('press'); setTimeout(() => api.go('scene', { id }), 200); };
 const place = (id, x, y, w, h, art) => ({ id, x, y, w, h, drag: false, cls: 'place', art, onTap: goTo(id) });
 
 export const WINTER_MAP = {
-  id: 'winter', title: 'Winter Planet ❄️', backLabel: 'Galaxy', back: ['galaxy'], weather: CLIMATES.winter, outdoor: true, noAvatar: true,
+  id: 'winter', width: WW, startX: 760, title: 'Winter Planet ❄️', backLabel: 'Galaxy', back: ['galaxy'], weather: CLIMATES.winter, outdoor: true, noAvatar: true,
   frame: (w) => `linear-gradient(${w === 'snow' ? '#B0B8D0' : '#A6D4F4'} 50%, #F4F8FF 50%)`,
   bg,
   items: [
@@ -76,5 +105,8 @@ export const WINTER_MAP = {
     place('lookout', 1180, 130, 260, 320, lookout),
     place('rink', 520, 560, 400, 280, rink),
     place('hill', 1040, 480, 400, 330, hill),
+    place('bakery', 1540, 250, 280, 280, bakery),
+    place('workshop', 1850, 240, 290, 290, workshop),
+    { ...place('springs', 1640, 540, 440, 320, springs), onTap: (it, api) => api.bubble(it.x + it.w / 2, it.y, 'The Hot Springs open soon! ♨️') }, // SOON
   ],
 };

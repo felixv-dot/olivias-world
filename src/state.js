@@ -1,37 +1,67 @@
-// Everything the game remembers on this device.
+// Everything the game remembers. Each player (account or guest) has their own copy.
 import { PRESETS } from './avatar.js';
 
-const KEY = 'ow-state-v1';
+const GUEST_KEY = 'ow-state-v1';
 const OLD_LOOK_KEY = 'ow-anime-avatar-v1';
 
 // A character: { id, name, kind: 'kid' | 'pet', look, travel }.
 // `activeId` is the kid you play as; others with `travel: true` come along into places.
-function load() {
-  const base = { chars: [], activeId: null, stars: [], weather: 'sun', winterWeather: 'snow', pos: {}, castle: 0, snowman: 0 };
+const fresh = () => ({ chars: [], activeId: null, stars: [], weather: 'sun', winterWeather: 'snow', pos: {}, castle: 0, snowman: 0 });
+
+function normalize(raw) {
+  const s = { ...fresh(), ...(raw || {}) };
+  if (!s.chars.length && s.look) {
+    s.chars = [{ id: 'c1', name: 'Me', kind: 'kid', look: { ...PRESETS.girl, ...s.look }, travel: true }];
+    s.activeId = 'c1';
+  }
+  delete s.look;
+  return s;
+}
+
+function readLocal(key) {
   try {
-    const s = { ...base, ...JSON.parse(localStorage.getItem(KEY) || '{}') };
-    if (!s.look) {
+    const raw = JSON.parse(localStorage.getItem(key) || 'null');
+    if (!raw && key === GUEST_KEY) {
       const old = JSON.parse(localStorage.getItem(OLD_LOOK_KEY) || 'null');
-      if (old) s.look = { ...PRESETS.girl, ...old };
+      if (old) return normalize({ look: old });
     }
-    // Older saves had a single `look`: turn it into the first saved character.
-    if (!s.chars.length && s.look) {
-      s.chars = [{ id: 'c1', name: 'Me', kind: 'kid', look: s.look, travel: true }];
-      s.activeId = 'c1';
-    }
-    delete s.look;
-    return s;
+    return normalize(raw);
   } catch {
-    return base;
+    return fresh();
   }
 }
 
-export const state = load();
+export const state = readLocal(GUEST_KEY);
 // Not saved: the rainbow only shows for a little while after the rain stops.
 export const session = { rainbowUntil: 0 };
 
+let storageKey = GUEST_KEY;
+let onSave = null;
+
+// Switch whose game we're playing: `key` is the local storage slot, `data` (optional) comes from the cloud.
+export function usePlayer(key, data, saveHook = null) {
+  storageKey = key;
+  onSave = saveHook;
+  const next = data ? normalize(data) : readLocal(key);
+  for (const k of Object.keys(state)) delete state[k];
+  Object.assign(state, next);
+  try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch { /* storage unavailable */ }
+}
+export const guestKey = GUEST_KEY;
+export const hasGuestProgress = () => readLocal(GUEST_KEY).chars.length > 0;
+export const guestData = () => readLocal(GUEST_KEY);
+
 export function save() {
-  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* storage unavailable */ }
+  try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch { /* storage unavailable */ }
+  onSave?.(state);
+}
+
+// Start over: wipe characters, stars and everything placed in the world for this player.
+export function resetGame() {
+  const keep = { muted: state.muted, hideInstallTip: state.hideInstallTip };
+  for (const k of Object.keys(state)) delete state[k];
+  Object.assign(state, fresh(), keep);
+  save();
 }
 
 export const newId = () => 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);

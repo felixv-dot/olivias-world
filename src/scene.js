@@ -8,9 +8,10 @@ import { renderPet, PET_ANIM } from './pets.js';
 import { el, topBar, rainLayer, snowLayer, refreshStars, CLIMATES, rotateHint } from './ui.js';
 import { sfx } from './sfx.js';
 
-const W = 1600, H = 900;
+const H = 900;
 
 export function sceneScreen(app, ctx, def) {
+  const W = def.width || 1600; // wide scenes (maps, fun fair…) scroll left and right
   const climate = def.weather === true ? CLIMATES.sunny : def.weather || null;
   const wkey = climate?.key || 'weather';
   const root = el('div', 'screen scene-screen');
@@ -26,20 +27,73 @@ export function sceneScreen(app, ctx, def) {
   const scene = el('div', 'scene');
   const bg = el('div', 'scene-bg');
   const fx = el('div', 'scene-fx');
-  scene.append(bg, fx);
-  wrap.append(scene);
+  const light = el('div', 'scene-light ' + (def.light || (def.outdoor ? 'outdoor' : 'indoor')));
+  scene.append(bg, light, fx);
+  scene.style.width = W + 'px';
+  const panL = el('button', 'pan pan-l', '‹'), panR = el('button', 'pan pan-r', '›');
+  panL.setAttribute('aria-label', 'Look left');
+  panR.setAttribute('aria-label', 'Look right');
+  wrap.append(scene, panL, panR);
   root.append(wrap, rotateHint());
   app.append(root);
 
   // ---------- scaling ----------
-  let scale = 1, offX = 0, offY = 0;
+  let scale = 1, offX = 0, offY = 0, camX = null, maxCam = 0;
   function fit() {
     const r = wrap.getBoundingClientRect();
-    scale = Math.min(r.width / W, r.height / H);
-    offX = (r.width - W * scale) / 2;
+    // Normal places fit the whole 1600×900 box; wide ones fill the height and scroll sideways.
+    scale = W > 1600 ? Math.min(r.height / H, (r.width / 1600) * 1.35) : Math.min(r.width / W, r.height / H);
     offY = (r.height - H * scale) / 2;
+    maxCam = Math.max(0, W * scale - r.width);
+    if (camX === null) {
+      const start = session.cam?.[def.id];
+      const focus = def.avatar ? def.avatar[0] + 85 : def.startX ?? 0;
+      camX = start !== undefined ? start * scale : focus * scale - r.width / 2;
+    }
+    camX = Math.max(0, Math.min(maxCam, camX));
+    offX = maxCam > 0 ? -camX : (r.width - W * scale) / 2;
     scene.style.transform = `translate(${offX}px, ${offY}px) scale(${scale})`;
+    panL.classList.toggle('show', maxCam > 0 && camX > 4);
+    panR.classList.toggle('show', maxCam > 0 && camX < maxCam - 4);
+    wrap.classList.toggle('scrolls', maxCam > 0);
+    (session.cam ||= {})[def.id] = camX / scale;
   }
+  const panBy = (dx) => { camX += dx; fit(); };
+  const viewCenter = () => (maxCam > 0 ? (camX + wrap.clientWidth / 2) / scale : W / 2);
+  let glide = null;
+  const panSmooth = (dx) => {
+    cancelAnimationFrame(glide);
+    const from = camX, t0 = performance.now();
+    const step = (t) => { const k = Math.min(1, (t - t0) / 350); camX = from + dx * (1 - (1 - k) ** 3); fit(); if (k < 1) glide = requestAnimationFrame(step); };
+    glide = requestAnimationFrame(step);
+  };
+  panL.onclick = () => panSmooth(-wrap.clientWidth * 0.6);
+  panR.onclick = () => panSmooth(wrap.clientWidth * 0.6);
+  wrap.addEventListener('wheel', (e) => { if (maxCam > 0) { e.preventDefault(); panBy(Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY); } }, { passive: false });
+  // Drag the empty background to look around.
+  wrap.addEventListener('pointerdown', (e) => {
+    if (maxCam <= 0 || e.target.closest('.item, .pan, .modal')) return;
+    const sx = e.clientX, c0 = camX;
+    let lastX = e.clientX, lastT = performance.now(), vel = 0;
+    wrap.setPointerCapture(e.pointerId);
+    wrap.classList.add('panning');
+    const move = (ev) => {
+      const now = performance.now();
+      vel = (lastX - ev.clientX) / Math.max(1, now - lastT);
+      lastX = ev.clientX; lastT = now;
+      camX = c0 - (ev.clientX - sx); fit();
+    };
+    const up = () => {
+      wrap.removeEventListener('pointermove', move);
+      wrap.removeEventListener('pointerup', up);
+      wrap.removeEventListener('pointercancel', up);
+      wrap.classList.remove('panning');
+      if (Math.abs(vel) > 0.3) panSmooth(vel * 260);
+    };
+    wrap.addEventListener('pointermove', move);
+    wrap.addEventListener('pointerup', up);
+    wrap.addEventListener('pointercancel', up);
+  });
   const ro = new ResizeObserver(fit);
   ro.observe(wrap);
   fit();
@@ -68,10 +122,10 @@ export function sceneScreen(app, ctx, def) {
     clearTimeout(rainbowTimer);
     if (performance.now() < session.rainbowUntil) rainbowTimer = setTimeout(drawBg, session.rainbowUntil - performance.now() + 50);
     const w = state[wkey];
-    if (w === 'rain') api.bubble(W / 2, 160, def.outdoor ? "It's raining! 🌧️" : 'Rain outside! ☔');
-    else if (w === 'snow') api.bubble(W / 2, 160, 'Let it snow! ❄️');
-    else if (w === 'clear') api.bubble(W / 2, 160, 'Clear blue sky! ☀️');
-    else if (performance.now() < session.rainbowUntil) api.bubble(W / 2, 160, 'A rainbow! 🌈');
+    if (w === 'rain') api.bubble(viewCenter(), 160, def.outdoor ? "It's raining! 🌧️" : 'Rain outside! ☔');
+    else if (w === 'snow') api.bubble(viewCenter(), 160, 'Let it snow! ❄️');
+    else if (w === 'clear') api.bubble(viewCenter(), 160, 'Clear blue sky! ☀️');
+    else if (performance.now() < session.rainbowUntil) api.bubble(viewCenter(), 160, 'A rainbow! 🌈');
   }
   drawBg();
   if (performance.now() < session.rainbowUntil) rainbowTimer = setTimeout(drawBg, session.rainbowUntil - performance.now() + 50);
@@ -128,6 +182,11 @@ export function sceneScreen(app, ctx, def) {
         if (!start.moved && Math.hypot(mx - sx, my - sy) > 8) {
           start.moved = true;
           if (canDrag) { it.el.classList.add('dragging'); sfx.pick(); }
+        }
+        if (start.moved && canDrag && maxCam > 0) {
+          const r = wrap.getBoundingClientRect();
+          if (ev.clientX < r.left + 60 && camX > 0) { panBy(-14); }
+          else if (ev.clientX > r.right - 60 && camX < maxCam) { panBy(14); }
         }
         if (start.moved && canDrag) {
           it.x = Math.max(-it.w * 0.3, Math.min(W - it.w * 0.7, start.x + mx - sx));

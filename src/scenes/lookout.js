@@ -66,7 +66,7 @@ function starGame(api, scope) {
 }
 
 export const LOOKOUT = {
-  id: 'lookout', title: 'Starry Lookout 🔭', back: ['scene', { id: 'winter' }], weather: CLIMATES.winter, outdoor: true, avatar: [470, 440],
+  id: 'lookout', light: 'night', title: 'Starry Lookout 🔭', back: ['scene', { id: 'winter' }], weather: CLIMATES.winter, outdoor: true, avatar: [470, 440],
   frame: 'linear-gradient(#1B1D4A 60%, #EEF2FB 60%)',
   bg,
   stars: [{ id: 'lookout-blanket', x: 1060, y: 800, z: 3 }],

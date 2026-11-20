@@ -1,0 +1,74 @@
+/* Extra animations for the Winter Planet places: Snowflake Bakery, Toy Workshop, Hot Springs.
+   All classes are prefixed with wx- so they never clash with style.css. */
+
+/* ---------- shared ---------- */
+.fx.wx-puff { animation: wx-puff 1.3s ease-out forwards; }
+@keyframes wx-puff {
+  0% { transform: translate(-50%, -50%) scale(0.35); opacity: 0.95; }
+  100% { transform: translate(-50%, -95%) scale(1.7); opacity: 0; }
+}
+.fx.wx-ripple { animation: wx-ripple 1.4s ease-out forwards; }
+@keyframes wx-ripple {
+  0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+}
+.wx-steam { transform-box: fill-box; transform-origin: 50% 100%; animation: wx-steam 5s ease-in-out infinite; }
+@keyframes wx-steam {
+  0% { transform: translateY(0) scale(0.9); opacity: 0; }
+  20% { opacity: 0.55; }
+  100% { transform: translateY(-70px) scale(1.25); opacity: 0; }
+}
+.item.wx-float > svg { animation: wx-float 3.6s ease-in-out infinite; }
+@keyframes wx-float { 0%, 100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(5px) rotate(1.5deg); } }
+
+/* ---------- bakery ---------- */
+.item .wx-glow { opacity: 0.3; transition: opacity 0.4s; }
+.item.wx-baking .wx-glow { animation: wx-glow 0.7s ease-in-out infinite alternate; }
+@keyframes wx-glow { from { opacity: 0.65; } to { opacity: 1; } }
+.wx-dial { transform-box: fill-box; transform-origin: center; }
+.item.wx-baking .wx-dial { animation: wx-turn 2.2s linear; }
+@keyframes wx-turn { to { transform: rotate(-360deg); } }
+.item.wx-baking .wx-heat { display: inline; }
+.item .wx-heat { display: none; }
+.item.wx-roll > svg { animation: wx-roll 0.5s ease-in-out 3; }
+@keyframes wx-roll { 0%, 100% { transform: translateX(0) rotate(0); } 50% { transform: translateX(40px) rotate(4deg); } }
+.wx-pendulum { transform-box: fill-box; transform-origin: 50% 0; animation: wx-pend 2s ease-in-out infinite; }
+@keyframes wx-pend { 0%, 100% { transform: rotate(9deg); } 50% { transform: rotate(-9deg); } }
+
+/* ---------- workshop ---------- */
+.wx-gear { transform-box: fill-box; transform-origin: center; }
+.item.wx-run .wx-gear { animation: wx-spin 1.1s linear infinite; }
+.item.wx-run .wx-gear.ccw { animation-direction: reverse; animation-duration: 0.8s; }
+@keyframes wx-spin { to { transform: rotate(360deg); } }
+.item .wx-chimney-puff { display: none; }
+.item.wx-run .wx-chimney-puff { display: inline; }
+.item.wx-run .wx-lamp { animation: wx-blink 0.35s steps(2) infinite; }
+@keyframes wx-blink { 50% { opacity: 0.25; } }
+.item.wx-rollout { animation: wx-rollout 1s cubic-bezier(.3, .7, .4, 1); }
+@keyframes wx-rollout { from { transform: translateX(var(--from, -240px)); } to { transform: translateX(0); } }
+.item.wx-train { animation: wx-train 18s ease-in-out infinite; }
+@keyframes wx-train {
+  0% { transform: translateX(0) scaleX(1); }
+  46% { transform: translateX(var(--run, 760px)) scaleX(1); }
+  50% { transform: translateX(var(--run, 760px)) scaleX(-1); }
+  96% { transform: translateX(0) scaleX(-1); }
+  100% { transform: translateX(0) scaleX(1); }
+}
+.item .wx-toot-puff { display: none; }
+.item.wx-toot .wx-toot-puff { display: inline; animation: wx-tootpuff 0.9s ease-out; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes wx-tootpuff { from { transform: translateY(10px) scale(0.4); opacity: 1; } to { transform: translateY(-26px) scale(1.4); opacity: 0; } }
+.item.wx-rock > svg { animation: wx-rock 0.8s ease-in-out 3; transform-origin: 50% 92%; }
+@keyframes wx-rock { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-9deg); } 75% { transform: rotate(9deg); } }
+.item.wx-whirl > svg { animation: wx-whirl 0.32s linear 6; transform-origin: 50% 100%; }
+@keyframes wx-whirl {
+  0% { transform: rotate(-5deg) scaleX(1); } 25% { transform: rotate(5deg) scaleX(-0.2); }
+  50% { transform: rotate(-5deg) scaleX(-1); } 75% { transform: rotate(5deg) scaleX(0.2); } 100% { transform: rotate(-5deg) scaleX(1); }
+}
+
+/* ---------- hot springs ---------- */
+.item.avatar-item.wx-soak { animation: wx-soak 3.2s ease-in-out infinite; }
+.item.avatar-item.wx-soak > svg { clip-path: inset(0 0 37% 0); }
+@keyframes wx-soak { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
+.wx-chair { animation: wx-lift 64s linear infinite; }
+.wx-chair.down { animation-direction: reverse; }
+@keyframes wx-lift { from { transform: translate(0, 0); } to { transform: translate(var(--lx, 2340px), var(--ly, -76px)); } }

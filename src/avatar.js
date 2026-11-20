@@ -119,6 +119,7 @@ function face(look, uid) {
   if (look.face === 'boy') {
     return `
   <path class="o" ${fill('skin')} d="M120 198 C120 130 160 102 210 102 C260 102 300 130 300 198 C300 250 292 286 270 310 C252 328 232 334 210 334 C188 334 168 328 150 310 C128 286 120 250 120 198 Z"/>
+  <path d="M124 190 Q210 166 296 190 L298 226 Q210 204 122 226 Z" fill="#3E3252" opacity=".07"/>
   <ellipse cx="150" cy="292" rx="18" ry="8" fill="url(#${uid}-blush)" opacity=".55"/>
   <ellipse cx="270" cy="292" rx="18" ry="8" fill="url(#${uid}-blush)" opacity=".55"/>
   ${eye(uid, 'L', 170, 256, false, { flick: false, sy: 0.8, lash: 4.5 })}
@@ -129,8 +130,10 @@ function face(look, uid) {
   }
   return `
   <path class="o" ${fill('skin')} d="M118 200 C118 130 160 100 210 100 C260 100 302 130 302 200 C302 255 285 292 255 318 C238 332 224 338 210 338 C196 338 182 332 165 318 C135 292 118 255 118 200 Z"/>
-  <ellipse cx="146" cy="290" rx="22" ry="11" fill="url(#${uid}-blush)"/>
-  <ellipse cx="274" cy="290" rx="22" ry="11" fill="url(#${uid}-blush)"/>
+  <path d="M124 196 Q210 170 296 196 L300 238 Q210 212 120 238 Z" fill="#3E3252" opacity=".07"/>
+  <path d="M150 326 Q210 346 270 326 Q246 338 210 340 Q174 338 150 326 Z" fill="#3E3252" opacity=".06"/>
+  <ellipse cx="146" cy="290" rx="22" ry="11" fill="url(#${uid}-blush)" opacity=".75"/>
+  <ellipse cx="274" cy="290" rx="22" ry="11" fill="url(#${uid}-blush)" opacity=".75"/>
   <path class="ln" stroke-width="1.6" opacity=".5" d="M136 292 L141 285 M144 293 L149 286 M152 293 L157 286 M264 292 L269 285 M272 293 L277 286 M280 293 L285 286"/>
   ${eye(uid, 'L', 168, 252, false)}
   ${eye(uid, 'R', 252, 252, true)}

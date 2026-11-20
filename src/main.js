@@ -1,5 +1,7 @@
 // Olivia's World — screen navigation.
 import { state } from './state.js';
+import { resume } from './accounts.js';
+import { welcomeScreen } from './welcome.js';
 import { editorScreen } from './editor.js';
 import { rosterScreen } from './roster.js';
 import { galaxyScreen } from './galaxy.js';
@@ -13,6 +15,7 @@ const app = document.getElementById('app');
 let current = null;
 
 const SCREENS = {
+  welcome: welcomeScreen,
   editor: editorScreen,
   roster: rosterScreen,
   galaxy: galaxyScreen,
@@ -25,7 +28,13 @@ function go(name, params = {}) {
   current = SCREENS[name](app, { go, params });
 }
 
-go(state.chars.length ? 'galaxy' : 'editor', state.chars.length ? {} : { newKind: 'kid', first: true });
+// Resume the last player (account or guest); otherwise show the welcome screen.
+app.innerHTML = '<div class="loading">✨ Loading…</div>';
+resume().then((ok) => {
+  if (!ok) go('welcome');
+  else if (state.chars.length) go('galaxy');
+  else go('editor', { newKind: 'kid', first: true });
+}).catch(() => go('welcome'));
 
 // Handy for testing from the browser console: __ow.go('scene', { id: 'park' })
 window.__ow = { go };

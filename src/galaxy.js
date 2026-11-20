@@ -3,6 +3,7 @@ import { render, animate } from './avatar.js';
 import { getLook, activeChar } from './state.js';
 import { el, starBadge, rotateHint } from './ui.js';
 import { installTip } from './mobile.js';
+import { openSettings } from './settings.js';
 
 const INK = '#4A3B5C';
 
@@ -91,7 +92,10 @@ export function galaxyScreen(app, ctx) {
   const charsBtn = el('button', 'btn chars-btn', '👥 My characters');
   charsBtn.onclick = () => ctx.go('roster');
   const headRight = el('div', 'galaxy-head-right');
-  headRight.append(charsBtn, starBadge());
+  const gear = el('button', 'btn alt gear-btn', '⚙️');
+  gear.setAttribute('aria-label', 'Account and settings');
+  gear.onclick = () => openSettings(root, ctx);
+  headRight.append(charsBtn, starBadge(), gear);
   head.append(el('div', 'logo', "Olivia's World"), headRight);
   root.append(head, el('div', 'galaxy-title', 'Choose a planet'));
 
@@ -132,7 +136,7 @@ export function galaxyScreen(app, ctx) {
   const anim = animate(() => meAvatar.firstElementChild);
   meAvatar.onclick = () => anim.happy();
 
-  root.append(el('div', 'version', 'v1.3'));
+  root.append(el('div', 'version', 'v1.4'));
   root.append(rotateHint());
   const tip = installTip();
   if (tip) root.append(tip);

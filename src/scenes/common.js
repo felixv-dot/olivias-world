@@ -22,18 +22,19 @@ export function cloud(x, y, s, color, dur) {
   return `<g class="drift" style="animation-duration:${dur}s"><g transform="translate(${x} ${y}) scale(${s})">
     <path ${O} d="M0 46 Q-4 10 36 14 Q52 -16 92 2 Q130 -8 140 30 Q176 30 172 58 Q170 70 156 70 L14 70 Q-6 68 0 46 Z" fill="${color}"/></g></g>`;
 }
-export function sky({ weather, rainbow }, h = 900, id = 'sky') {
+export function sky({ weather, rainbow }, h = 900, id = 'sky', width = 1600) {
   const sunny = weather === 'sun';
   const c = sunny ? '#FFFFFF' : '#DCE1EA';
   return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="${sunny ? '#A9DCFF' : '#97A5BC'}"/><stop offset="1" stop-color="${sunny ? '#FFF1D6' : '#CDD4DF'}"/></linearGradient>
       <radialGradient id="${id}-sun"><stop offset="0" stop-color="#FFF6C8"/><stop offset=".55" stop-color="#FFE27A" stop-opacity=".6"/><stop offset="1" stop-color="#FFE27A" stop-opacity="0"/></radialGradient></defs>
-    <rect width="1600" height="${h}" fill="url(#${id})"/>
-    ${sunny ? `<circle cx="1380" cy="130" r="170" fill="url(#${id}-sun)"/><circle cx="1380" cy="130" r="66" fill="#FFE68A"/><circle cx="1380" cy="130" r="52" fill="#FFF3B8"/>` : ''}
+    <rect width="${width}" height="${h}" fill="url(#${id})"/>
+    ${sunny ? `<circle cx="${width - 220}" cy="130" r="170" fill="url(#${id}-sun)"/><circle cx="${width - 220}" cy="130" r="66" fill="#FFE68A"/><circle cx="${width - 220}" cy="130" r="52" fill="#FFF3B8"/>` : ''}
     ${rainbow ? `<g fill="none" stroke-width="22" opacity=".7" stroke-linecap="round">
       ${['#E58F6A', '#F5DE7A', '#9EDDD4', '#8FC3F0', '#B79CF0'].map((col, i) => `<path d="M${260 + i * 22} ${h * 0.62} A${540 - i * 22} ${430 - i * 22} 0 0 1 ${1340 - i * 22} ${h * 0.62}" stroke="${col}"/>`).join('')}</g>` : ''}
     ${cloud(160, 90, 1.1, c, 60)}${cloud(760, 60, 0.8, c, 80)}${cloud(1080, 210, 0.6, c, 70)}
-    ${sunny ? '' : `${cloud(420, 150, 1.2, '#C4CBD8', 50)}${cloud(1240, 70, 1, '#C4CBD8', 65)}`}`;
+    ${width > 1600 ? `${cloud(1760, 110, 1, c, 75)}${cloud(2300, 70, 0.7, c, 85)}` : ''}
+    ${sunny ? '' : `${cloud(420, 150, 1.2, '#C4CBD8', 50)}${cloud(1240, 70, 1, '#C4CBD8', 65)}${width > 1600 ? cloud(2000, 130, 1.1, '#C4CBD8', 60) : ''}`}`;
 }
 export function windowArt(x, y, w, h, weather, curtain = '#B79CF0') {
   const sunny = weather === 'sun';
@@ -141,18 +142,18 @@ Object.assign(NPC_WINTER, {
 });
 
 // ---------- winter scenery ----------
-export function winterSky({ weather }, h = 900, id = 'wsky') {
+export function winterSky({ weather }, h = 900, id = 'wsky', width = 1600) {
   const clear = weather === 'clear';
   return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="${clear ? '#9FD2F5' : '#AEB6CF'}"/><stop offset="1" stop-color="${clear ? '#EAF4FF' : '#DCE0EC'}"/></linearGradient>
       <radialGradient id="${id}-sun"><stop offset="0" stop-color="#FFFBE6"/><stop offset=".6" stop-color="#FFF3C0" stop-opacity=".5"/><stop offset="1" stop-color="#FFF3C0" stop-opacity="0"/></radialGradient></defs>
-    <rect width="1600" height="${h}" fill="url(#${id})"/>
-    ${clear ? `<circle cx="1360" cy="120" r="150" fill="url(#${id}-sun)"/><circle cx="1360" cy="120" r="54" fill="#FFF6D2"/>` : `${cloud(200, 80, 1.2, '#E6E9F2', 70)}${cloud(900, 50, 1, '#E6E9F2', 90)}${cloud(1250, 140, 0.9, '#E6E9F2', 60)}`}
+    <rect width="${width}" height="${h}" fill="url(#${id})"/>
+    ${clear ? `<circle cx="${width - 240}" cy="120" r="150" fill="url(#${id}-sun)"/><circle cx="${width - 240}" cy="120" r="54" fill="#FFF6D2"/>` : `${cloud(200, 80, 1.2, '#E6E9F2', 70)}${cloud(900, 50, 1, '#E6E9F2', 90)}${cloud(1250, 140, 0.9, '#E6E9F2', 60)}${width > 1600 ? `${cloud(1800, 90, 1, '#E6E9F2', 80)}${cloud(2300, 60, 0.8, '#E6E9F2', 70)}` : ''}`}
     ${clear ? `${cloud(260, 110, 0.8, '#fff', 80)}${cloud(980, 70, 0.6, '#fff', 90)}` : ''}`;
 }
-export function mountains(y, color = '#D8DDF0') {
-  return `<path d="M-20 ${y} L180 ${y - 220} L300 ${y - 130} L460 ${y - 300} L640 ${y - 90} L820 ${y - 250} L1000 ${y - 120} L1180 ${y - 280} L1360 ${y - 110} L1500 ${y - 200} L1640 ${y} Z" fill="${color}"/>
-    <path d="M180 ${y - 220} L220 ${y - 170} L200 ${y - 160} L160 ${y - 190} Z M460 ${y - 300} L510 ${y - 240} L470 ${y - 230} L430 ${y - 260} Z M820 ${y - 250} L866 ${y - 196} L826 ${y - 186} L790 ${y - 214} Z M1180 ${y - 280} L1226 ${y - 222} L1186 ${y - 212} L1146 ${y - 246} Z" fill="#fff"/>`;
+export function mountains(y, color = '#D8DDF0', dx = 0) {
+  return `<g transform="translate(${dx} 0)"><path d="M-20 ${y} L180 ${y - 220} L300 ${y - 130} L460 ${y - 300} L640 ${y - 90} L820 ${y - 250} L1000 ${y - 120} L1180 ${y - 280} L1360 ${y - 110} L1500 ${y - 200} L1640 ${y} Z" fill="${color}"/>
+    <path d="M180 ${y - 220} L220 ${y - 170} L200 ${y - 160} L160 ${y - 190} Z M460 ${y - 300} L510 ${y - 240} L470 ${y - 230} L430 ${y - 260} Z M820 ${y - 250} L866 ${y - 196} L826 ${y - 186} L790 ${y - 214} Z M1180 ${y - 280} L1226 ${y - 222} L1186 ${y - 212} L1146 ${y - 246} Z" fill="#fff"/></g>`;
 }
 export function pine(x, y, s = 1, snowy = true) {
   return `<g transform="translate(${x} ${y}) scale(${s})">

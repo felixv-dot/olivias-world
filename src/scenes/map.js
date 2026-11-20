@@ -1,22 +1,27 @@
 // Sunny Planet island map: tap a place to go there.
 import { INK, O, svg, label, text, sky, starPath } from './common.js';
 
+const MW = 2800; // the island is wide: scroll left and right
 const mapBg = (w) => {
   const sun = w.weather === 'sun';
-  return svg(1600, 900, `
-  ${sky(w, 900, 'mapSky')}
-  <rect y="470" width="1600" height="430" fill="${sun ? '#7FD3E0' : '#8AAAB8'}"/>
+  return svg(MW, 900, `
+  ${sky(w, 900, 'mapSky', MW)}
+  <rect y="470" width="${MW}" height="430" fill="${sun ? '#7FD3E0' : '#8AAAB8'}"/>
+  <rect y="470" width="${MW}" height="40" fill="#fff" opacity=".18"/>
   <g class="waves" stroke="#fff" stroke-width="5" fill="none" opacity=".7" stroke-linecap="round">
-    <path d="M40 520 q30 -14 60 0 t60 0 M1420 560 q30 -14 60 0 t60 0 M60 860 q30 -14 60 0 t60 0 M1440 860 q30 -14 60 0 t60 0"/></g>
-  <g class="drift" style="animation-duration:40s"><g transform="translate(1440 470)"><path ${O} d="M0 30 H80 L66 48 H14 Z" fill="#fff"/><path ${O} d="M40 28 V-30 L72 22 Z" fill="#C9B8F2"/></g></g>
-  <path ${O} d="M60 610 C60 430 400 336 800 340 C1220 344 1546 430 1540 612 C1534 806 1160 878 800 876 C420 874 60 810 60 610 Z" fill="${sun ? '#F7E3A9' : '#E3D3A8'}" style="stroke-width:4"/>
-  <path d="M130 590 C150 450 470 380 800 386 C1130 392 1460 460 1470 600 C1470 700 1300 760 800 770 C380 772 130 700 130 590 Z" fill="${sun ? '#A8DE9A' : '#97C68E'}"/>
-  <g fill="${sun ? '#93D08A' : '#86B87E'}">${Array.from({ length: 26 }, (_, i) => `<ellipse cx="${200 + ((i * 197) % 1200)}" cy="${420 + ((i * 113) % 330)}" rx="${18 + (i % 3) * 6}" ry="7"/>`).join('')}</g>
+    <path d="M40 520 q30 -14 60 0 t60 0 M1420 520 q30 -14 60 0 t60 0 M60 860 q30 -14 60 0 t60 0 M2600 860 q30 -14 60 0 t60 0 M2640 540 q30 -14 60 0 t60 0"/></g>
+  <g class="drift" style="animation-duration:40s"><g transform="translate(2640 470)"><path ${O} d="M0 30 H80 L66 48 H14 Z" fill="#fff"/><path ${O} d="M40 28 V-30 L72 22 Z" fill="#C9B8F2"/></g></g>
+  <path ${O} d="M60 610 C60 430 500 336 1400 340 C2300 344 2746 430 2740 612 C2734 806 2260 878 1400 876 C520 874 60 810 60 610 Z" fill="${sun ? '#F7E3A9' : '#E3D3A8'}" style="stroke-width:4"/>
+  <path d="M130 590 C150 450 600 384 1400 386 C2200 388 2660 460 2670 600 C2670 700 2400 770 1400 772 C480 772 130 700 130 590 Z" fill="${sun ? '#A8DE9A' : '#97C68E'}"/>
+  <g fill="${sun ? '#93D08A' : '#86B87E'}">${Array.from({ length: 46 }, (_, i) => `<ellipse cx="${200 + ((i * 197) % 2400)}" cy="${420 + ((i * 113) % 330)}" rx="${18 + (i % 3) * 6}" ry="7"/>`).join('')}</g>
   <g stroke="#EBCB86" stroke-width="20" stroke-linecap="round" stroke-dasharray="2 34" fill="none">
-    <path d="M240 520 Q500 560 800 520 Q1100 490 1130 520"/><path d="M360 560 Q560 640 760 640 Q1000 640 1180 660"/></g>
+    <path d="M240 520 Q500 560 800 520 Q1100 490 1400 520 Q1800 560 2300 510"/><path d="M360 560 Q560 640 760 640 Q1000 640 1180 660 Q1500 690 1800 650 Q2100 620 2400 660"/></g>
+  <g transform="translate(2470 330)"><rect ${O} x="20" y="40" width="50" height="190" fill="#FBF7EF"/><path d="M20 90 H70 M20 150 H70" stroke="#E58F6A" stroke-width="16"/>
+    <rect ${O} x="10" y="10" width="70" height="36" rx="6" fill="#F5DE7A"/><path ${O} d="M6 12 L45 -24 L84 12 Z" fill="#E58F6A"/>
+    <path d="M80 26 L200 0 V52 Z" fill="#FFF3B0" opacity=".45"/></g>
   <g transform="translate(10 520)"><path d="M40 160 Q50 80 34 20" stroke="#8B6450" stroke-width="14" fill="none" stroke-linecap="round"/>
     <path d="M34 22 Q0 0 -30 20 M34 22 Q70 -6 100 16 M34 22 Q14 -24 -10 -30 M34 22 Q60 -26 84 -24" stroke="#4E9B5A" stroke-width="16" fill="none" stroke-linecap="round"/></g>
-  <g transform="translate(1490 520)"><path d="M40 160 Q30 80 46 20" stroke="#8B6450" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <g transform="translate(2690 520)"><path d="M40 160 Q30 80 46 20" stroke="#8B6450" stroke-width="14" fill="none" stroke-linecap="round"/>
     <path d="M46 22 Q10 -2 -20 16 M46 22 Q80 0 110 20 M46 22 Q30 -24 4 -30 M46 22 Q70 -26 94 -20" stroke="#4E9B5A" stroke-width="16" fill="none" stroke-linecap="round"/></g>`);
 };
 
@@ -89,11 +94,46 @@ const beach = () => svg(360, 280, `
   <circle ${O} cx="96" cy="178" r="22" fill="#fff"/><path d="M76 172 Q96 162 116 172" stroke="#3CC7B8" stroke-width="7" fill="none"/>
   ${label(180, 256, 'Beach', 150)}`);
 
+const salon = () => svg(300, 330, `
+  <rect ${O} x="40" y="100" width="220" height="180" rx="10" fill="#DDF3EF"/>
+  <path ${O} d="M30 104 H270 V132 Q150 150 30 132 Z" fill="#B79CF0"/>
+  <rect ${O} x="72" y="44" width="156" height="50" rx="16" fill="#fff"/>${text(150, 78, 'Salon', 30, '#7A64B0')}
+  <circle ${O} cx="106" cy="200" r="42" fill="#BFE6FF"/><path d="M90 176 Q106 160 122 176 Q130 196 120 214 Q106 222 92 214 Q82 196 90 176 Z" fill="#B79CF0" stroke="#4A3B5C" stroke-width="2"/>
+  <rect ${O} x="172" y="168" width="62" height="112" rx="10" fill="#9EDDD4"/><circle cx="222" cy="226" r="4" fill="#F5DE7A"/>
+  <path d="M244 110 V280" stroke="#E58F6A" stroke-width="8" stroke-dasharray="10 10"/>
+  ${label(150, 308, 'Hair Salon', 170)}`);
+
+const petshop = () => svg(300, 330, `
+  <rect ${O} x="40" y="100" width="220" height="180" rx="10" fill="#FBEFB4"/>
+  <path ${O} d="M26 106 L150 40 L274 106 Z" fill="#E58F6A"/>
+  <circle ${O} cx="150" cy="80" r="18" fill="#fff"/><path d="M142 78 a3 3 0 1 0 0.1 0 M158 78 a3 3 0 1 0 0.1 0 M150 88 q-6 6 0 8 q6 -2 0 -8" fill="#4A3B5C"/>
+  <rect ${O} x="58" y="160" width="100" height="84" rx="8" fill="#BFE6FF"/>
+  <ellipse cx="88" cy="224" rx="16" ry="12" fill="#F0A060"/><circle cx="88" cy="206" r="12" fill="#F0A060"/><ellipse cx="128" cy="226" rx="14" ry="10" fill="#FBF7EF"/><circle cx="128" cy="210" r="10" fill="#FBF7EF"/>
+  <rect ${O} x="176" y="168" width="60" height="112" rx="10" fill="#3CC7B8"/><circle cx="224" cy="226" r="4" fill="#F5DE7A"/>
+  ${label(150, 308, 'Pet Shop', 160)}`);
+
+const studio = () => svg(300, 330, `
+  <rect ${O} x="40" y="96" width="220" height="184" rx="10" fill="#E6DDFA"/>
+  <path ${O} d="M30 100 L150 52 L270 100 Z" fill="#8FC3F0"/>
+  <rect ${O} x="60" y="40" width="70" height="50" rx="6" fill="#fff" transform="rotate(-6 95 65)"/>
+  <circle cx="84" cy="62" r="8" fill="#E58F6A"/><circle cx="102" cy="72" r="7" fill="#3CC7B8"/><circle cx="96" cy="56" r="5" fill="#F5DE7A"/>
+  <rect ${O} x="58" y="150" width="104" height="90" rx="8" fill="#BFE6FF"/><path d="M76 226 L110 166 L144 226 Z" fill="#F5DE7A" stroke="#4A3B5C" stroke-width="2"/>
+  <rect ${O} x="178" y="164" width="58" height="116" rx="10" fill="#B79CF0"/><circle cx="224" cy="224" r="4" fill="#F5DE7A"/>
+  ${label(150, 308, 'Art Studio', 170)}`);
+
+const funfair = () => svg(440, 330, `
+  <g class="wheel-spin" style="transform-origin:150px 130px"><circle ${O} cx="150" cy="130" r="104" fill="none" style="stroke-width:5;stroke:#B79CF0"/>
+    ${Array.from({ length: 8 }, (_, i) => { const a = (i / 8) * Math.PI * 2; return `<line x1="150" y1="130" x2="${150 + Math.cos(a) * 104}" y2="${130 + Math.sin(a) * 104}" stroke="#C9B8F2" stroke-width="3"/><rect x="${136 + Math.cos(a) * 104}" y="${120 + Math.sin(a) * 104}" width="28" height="22" rx="6" fill="${['#F5DE7A', '#3CC7B8', '#8FC3F0', '#E58F6A'][i % 4]}" stroke="#4A3B5C" stroke-width="2"/>`; }).join('')}</g>
+  <path ${O} d="M150 130 L96 290 M150 130 L204 290" fill="none" style="stroke-width:6;stroke:#7A64B0"/>
+  <path ${O} d="M270 170 L340 120 L410 170 Z" fill="#3CC7B8"/><rect ${O} x="282" y="170" width="116" height="110" fill="#FBEFB4"/>
+  <path d="M300 170 V280 M330 170 V280 M360 170 V280" stroke="#E58F6A" stroke-width="4"/>
+  ${label(220, 308, 'Fun Fair', 160)}`);
+
 const goTo = (id) => (it, api) => { it.el.classList.add('press'); setTimeout(() => api.go('scene', { id }), 200); };
 const place = (id, x, y, w, h, art) => ({ id, x, y, w, h, drag: false, cls: 'place', art, onTap: goTo(id) });
 
 export const MAP = {
-  id: 'sunny', title: 'Sunny Planet ☀️', backLabel: 'Galaxy', back: ['galaxy'], weather: true, outdoor: true, noAvatar: true,
+  id: 'sunny', width: MW, startX: 760, title: 'Sunny Planet ☀️', backLabel: 'Galaxy', back: ['galaxy'], weather: true, outdoor: true, noAvatar: true,
   frame: 'linear-gradient(#A9DCFF 50%, #7FD3E0 50%)',
   bg: mapBg,
   items: [
@@ -104,5 +144,9 @@ export const MAP = {
     place('park', 200, 520, 320, 280, park),
     place('gym', 600, 540, 280, 280, gym),
     place('beach', 1010, 560, 380, 295, beach),
+    place('salon', 1560, 212, 250, 275, salon),
+    place('petshop', 1860, 214, 250, 275, petshop),
+    place('studio', 2160, 208, 250, 275, studio),
+    { ...place('funfair', 1560, 520, 440, 330, funfair), onTap: (it, api) => api.bubble(it.x + it.w / 2, it.y, 'The Fun Fair opens soon! 🎡') }, // SOON
   ],
 };
