@@ -277,7 +277,7 @@ const tableArt = () => svg(440, 260, `
   <g transform="translate(390 46)"><path d="M-14 26 H14 L8 20 H-8 Z" fill="#E9E5F2" stroke="${INK}" stroke-width="1.6"/><rect x="-12" y="6" width="24" height="15" rx="3" fill="#CDBDF0" stroke="${INK}" stroke-width="1.6"/><path d="M-12 9 q4 5 8 0 q4 5 8 0 q4 5 8 0" fill="#E8DEFA" stroke="${INK}" stroke-width="1.2"/></g>
   ${tag(220, 176, 'Decorate a cake 🎂', 210)}`);
 
-const sackArt = () => svg(150, 170, `
+const sackArt = (it) => svg(it.w, it.h, `<g transform="scale(${it.w / 150})">
   <defs><linearGradient id="bk-burlap" x1="0" x2="1"><stop offset="0" stop-color="#D2BE98"/><stop offset=".35" stop-color="#F1E5CC"/><stop offset="1" stop-color="#C8B38C"/></linearGradient>
     <pattern id="bk-weave" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M0 3 H6 M3 0 V6" stroke="#B9A47E" stroke-width=".8" opacity=".55"/></pattern></defs>
   ${shadow(75, 162, 66, 8, 0.18)}
@@ -288,7 +288,7 @@ const sackArt = () => svg(150, 170, `
   <rect x="40" y="84" width="70" height="46" rx="8" fill="#FBF7EF" fill-opacity=".85" stroke="#7FA9C9" stroke-width="2"/>
   ${text(75, 114, 'FLOUR', 17, '#5E86AE', 600)}<path d="M75 92 V102 M70 95 l5 4 5 -4" stroke="#C9A35A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
   <path d="M26 70 Q22 110 26 146" stroke="#fff" stroke-width="5" opacity=".3" fill="none" stroke-linecap="round"/>
-  <ellipse cx="120" cy="164" rx="22" ry="5" fill="#fff" opacity=".8"/>`);
+  <ellipse cx="120" cy="164" rx="22" ry="5" fill="#fff" opacity=".8"/></g>`);
 
 const puff = (api, x, y, n = 3, tint = '#FFFFFF') => {
   for (let i = 0; i < n; i++) {

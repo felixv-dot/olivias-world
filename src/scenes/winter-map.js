@@ -107,6 +107,6 @@ export const WINTER_MAP = {
     place('hill', 1040, 480, 400, 330, hill),
     place('bakery', 1540, 250, 280, 280, bakery),
     place('workshop', 1850, 240, 290, 290, workshop),
-    { ...place('springs', 1640, 540, 440, 320, springs), onTap: (it, api) => api.bubble(it.x + it.w / 2, it.y, 'The Hot Springs open soon! ♨️') }, // SOON
+    place('springs', 1640, 540, 440, 320, springs),
   ],
 };

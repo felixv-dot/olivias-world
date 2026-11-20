@@ -18,9 +18,10 @@ import { PETSHOP } from './petshop.js';
 import { STUDIO } from './studio.js';
 import { BAKERY } from './bakery.js';
 import { WORKSHOP } from './workshop.js';
+import { SPRINGS } from './springs.js';
 
 export const SCENES = {
   sunny: MAP, home: HOME, cafe: CAFE, beach: BEACH, park: PARK, boutique: BOUTIQUE, gym: GYM, games: GAMES,
   salon: SALON, petshop: PETSHOP, studio: STUDIO, bakery: BAKERY, workshop: WORKSHOP,
-  winter: WINTER_MAP, cabin: CABIN, market: MARKET, rink: RINK, hill: HILL, lookout: LOOKOUT,
+  winter: WINTER_MAP, cabin: CABIN, market: MARKET, rink: RINK, hill: HILL, lookout: LOOKOUT, springs: SPRINGS,
 };
