@@ -81,7 +81,7 @@ const bg = (w) => {
     <g transform="translate(278 -40)"><path d="M8 40 Q0 20 12 4 Q24 20 16 40 Z" fill="#6DBE7A" opacity=".9"/><path d="M14 40 Q30 18 40 10 Q34 30 20 40 Z" fill="#5AAE6A"/><rect x="2" y="36" width="30" height="16" rx="4" fill="#FBF8FD" stroke="${INK}" stroke-width="1.6"/></g>
     <path d="M70 -4 h56 l-4 4 h-48 z" fill="${INK}" opacity=".7"/><path d="M76 -4 v-4 M84 -4 v-4 M92 -4 v-4 M100 -4 v-4 M108 -4 v-4 M116 -4 v-4" stroke="${INK}" stroke-width="1.5"/>
   </g>
-  ${[560, 1240].map((x) => `<g transform="translate(${x} 0)"><path d="M0 30 V96" stroke="${INK}" stroke-width="2"/><circle cx="0" cy="150" r="90" fill="url(#salon-glow)"/>
+  ${[1240].map((x) => `<g transform="translate(${x} 0)"><path d="M0 30 V96" stroke="${INK}" stroke-width="2"/><circle cx="0" cy="150" r="90" fill="url(#salon-glow)"/>
     <path d="M-34 126 Q-32 96 0 94 Q32 96 34 126 Z" fill="url(#salon-brass)" stroke="${INK}" stroke-width="2"/><ellipse cx="0" cy="128" rx="18" ry="5" fill="#FFF4C4"/></g>`).join('')}
   <g transform="translate(1330 70)"><rect width="250" height="26" rx="13" fill="${INK}"/>${text(125, 19, 'SUNNY SALON', 15, '#F5DE7A', 600)}</g>`);
 };
@@ -90,7 +90,7 @@ const bg = (w) => {
 const HAIR_SHAPES = {
   bobBuns: (c) => `<circle cx="34" cy="34" r="13" fill="${c}"/><circle cx="76" cy="34" r="13" fill="${c}"/><path d="M24 62 Q24 34 55 34 Q86 34 86 62 L88 84 Q55 92 22 84 Z" fill="${c}"/>`,
   bob: (c) => `<path d="M22 62 Q22 32 55 32 Q88 32 88 62 L90 88 Q55 96 20 88 Z" fill="${c}"/>`,
-  long: (c) => `<path d="M24 60 Q24 32 55 32 Q86 32 86 60 L90 112 Q55 122 20 112 Z" fill="${c}"/>`,
+  long: (c) => `<path d="M24 60 Q24 32 55 32 Q86 32 86 60 L91 88 Q55 94 19 88 Z" fill="${c}"/><path d="M19 88 Q16 80 24 74 M91 88 Q94 80 86 74" stroke="${c}" stroke-width="5" fill="none"/>`,
   pigtails: (c) => `<path d="M24 50 Q8 64 12 98 Q16 108 24 100 Q22 76 30 60 Z M86 50 Q102 64 98 98 Q94 108 86 100 Q88 76 80 60 Z" fill="${c}"/><path d="M26 64 Q26 34 55 34 Q84 34 84 64 L82 78 Q55 84 28 78 Z" fill="${c}"/><circle cx="28" cy="56" r="4" fill="#3CC7B8"/><circle cx="82" cy="56" r="4" fill="#3CC7B8"/>`,
   fluffy: (c) => `<path d="M26 66 Q18 52 28 44 Q28 30 42 30 Q50 22 62 28 Q78 24 82 38 Q94 44 86 58 Q90 70 82 76 Q55 84 30 76 Q22 72 26 66 Z" fill="${c}"/>`,
 };

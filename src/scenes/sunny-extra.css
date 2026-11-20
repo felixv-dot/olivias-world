@@ -1,0 +1,72 @@
+/* Animations for the Sunny Planet places: salon, pet shop, art studio, fun fair.
+   Link after style.css. Everything is prefixed sx- so nothing clashes with existing classes. */
+
+/* ---------- shared ---------- */
+.item.sx-twirl > svg { animation: sx-twirl 1s ease-in-out; }
+@keyframes sx-twirl { to { transform: rotateY(360deg); } }
+
+/* ---------- salon: hood dryer ---------- */
+.item .sx-air { display: none; }
+.item.sx-blow .sx-air { display: inline; animation: sx-air 0.35s linear infinite; }
+.item.sx-blow > svg { animation: jiggle 0.12s linear infinite; }
+@keyframes sx-air { from { transform: translateY(0); opacity: 1; } to { transform: translateY(10px); opacity: 0.3; } }
+
+/* ---------- pet shop: aquarium + bird ---------- */
+.sx-fish { animation: sx-swim 7s ease-in-out infinite alternate; }
+@keyframes sx-swim { 0% { transform: translate(-40px, 0); } 50% { transform: translate(10px, -6px); } 100% { transform: translate(60px, 4px); } }
+.item.sx-dart .sx-fishdart { animation: sx-dart 0.9s ease-out; }
+@keyframes sx-dart { 0%, 100% { transform: translateX(0); } 35% { transform: translateX(34px); } }
+.sx-bub circle { opacity: 0; transform-box: fill-box; }
+.item.sx-bubbling .sx-bub circle { animation: sx-rise 1.4s ease-in infinite; }
+@keyframes sx-rise { 0% { transform: translateY(0); opacity: 0.9; } 100% { transform: translateY(-150px); opacity: 0; } }
+.sx-sway { transform-box: view-box; animation: sx-sway 4s ease-in-out infinite alternate; }
+@keyframes sx-sway { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+.item.sx-hopbird .sx-bird { animation: sx-hop 0.45s ease-out 2; }
+@keyframes sx-hop { 50% { transform: translateY(-16px); } }
+
+/* ---------- art studio: pottery wheel + paint splat ---------- */
+.item.sx-potting .sx-grain { animation: sx-grain 0.25s linear infinite; }
+@keyframes sx-grain { from { transform: translateX(0); } to { transform: translateX(8px); } }
+.fx.sx-splat { animation: sx-splat 0.9s ease-out forwards; }
+@keyframes sx-splat { 0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; } 30% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; } 100% { transform: translate(-50%, -30%) scale(1); opacity: 0; } }
+
+/* ---------- fun fair ---------- */
+/* Ferris wheel: the wheel turns, every cabin counter-turns so it stays upright. */
+.item .sx-wheel { transform-box: view-box; }
+.item .sx-cab { transform-box: fill-box; transform-origin: 50% 0; }
+.item.sx-spin .sx-wheel { animation: sx-rot 8s cubic-bezier(0.45, 0.05, 0.55, 0.95); }
+.item.sx-spin .sx-cab { animation: sx-rot-rev 8s cubic-bezier(0.45, 0.05, 0.55, 0.95); }
+@keyframes sx-rot { to { transform: rotate(360deg); } }
+@keyframes sx-rot-rev { to { transform: rotate(-360deg); } }
+
+/* Carousel: horses bob, the valance stripes slide, the bulbs light up. */
+.item.sx-turn .sx-horse { animation: sx-bob 0.7s ease-in-out infinite alternate; }
+@keyframes sx-bob { from { transform: translateY(0); } to { transform: translateY(-16px); } }
+.item.sx-turn .sx-band { animation: sx-band 0.6s linear infinite; }
+@keyframes sx-band { from { transform: translateX(0); } to { transform: translateX(24px); } }
+.item .sx-glow { transition: opacity 0.3s; }
+.item.sx-turn .sx-glow { opacity: 1; }
+.item.sx-turn .sx-bulb { fill: #FFF3B0; }
+
+/* High striker: the puck flies up to a height set in --h, then drops back. */
+.item.sx-strike .sx-puck { animation: sx-puck 1.2s cubic-bezier(0.2, 0.8, 0.3, 1); }
+@keyframes sx-puck { 0% { transform: translateY(0); } 42% { transform: translateY(var(--h, -300px)); } 100% { transform: translateY(0); } }
+
+/* Balloons bob gently, and float away when tapped. */
+.item.sx-balloon > svg { animation: sx-bobble 3s ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes sx-bobble { 0%, 100% { transform: rotate(-3deg) translateY(0); } 50% { transform: rotate(3deg) translateY(-8px); } }
+.item.sx-balloon.sx-float { animation: sx-float 2.6s ease-in forwards; pointer-events: none; }
+@keyframes sx-float { 0% { transform: translate(0, 0); } 40% { transform: translate(-20px, -380px); } 100% { transform: translate(50px, -1100px); opacity: 0.6; } }
+
+/* Photo booth. */
+.item.sx-snapping > svg { animation: jiggle 0.2s linear 3; }
+.fx.sx-flash {
+  width: 260px; height: 440px; border-radius: 18px;
+  background: radial-gradient(closest-side, #fff, rgba(255, 255, 255, 0.7) 60%, rgba(255, 255, 255, 0));
+  animation: sx-flash 0.7s ease-out forwards;
+}
+@keyframes sx-flash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .sx-fish, .sx-sway, .item.sx-balloon > svg { animation: none; }
+}

@@ -147,6 +147,6 @@ export const MAP = {
     place('salon', 1560, 212, 250, 275, salon),
     place('petshop', 1860, 214, 250, 275, petshop),
     place('studio', 2160, 208, 250, 275, studio),
-    { ...place('funfair', 1560, 520, 440, 330, funfair), onTap: (it, api) => api.bubble(it.x + it.w / 2, it.y, 'The Fun Fair opens soon! 🎡') }, // SOON
+    place('funfair', 1560, 520, 440, 330, funfair),
   ],
 };

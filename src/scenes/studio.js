@@ -308,7 +308,7 @@ export const STUDIO = {
         <path d="M60 132 Q40 100 62 76 Q86 50 70 22 Q96 40 92 70 Q88 96 104 116 Q96 132 80 132 Z" fill="url(#studio-ribbon)" stroke="${INK}" stroke-width="2"/>
         <path d="M66 120 Q54 98 70 80 Q86 62 78 38" stroke="#fff" stroke-width="3" fill="none" opacity=".45" stroke-linecap="round"/>
         <circle cx="94" cy="44" r="10" fill="#F5DE7A" stroke="${INK}" stroke-width="1.8"/><circle cx="91" cy="41" r="3" fill="#fff" opacity=".7"/>`) },
-    { id: 'stones', x: 1262, y: 238, w: 80, h: 110,
+    { id: 'stones', x: 1512, y: 782, w: 80, h: 110,
       onTap: (it, api) => { it.el.classList.remove('shake'); void it.el.offsetWidth; it.el.classList.add('shake'); api.bubble(it.x + 40, it.y - 8, 'Perfectly balanced! 🪨'); },
       art: () => svg(80, 110, `
         <defs><radialGradient id="studio-stone" cx=".35" cy=".3"><stop offset="0" stop-color="#F1ECF6"/><stop offset="1" stop-color="#A9A1BC"/></radialGradient></defs>

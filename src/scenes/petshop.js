@@ -74,7 +74,7 @@ const bg = (w) => svg(1600, 900, `
     ${[14, 64, 114, 164].map((x, i) => `<circle cx="${x + 18}" cy="200" r="18" fill="${['#F5DE7A', '#3CC7B8', '#E58F6A', '#B79CF0'][i]}" stroke="${INK}" stroke-width="1.6"/><path d="M${x + 4} 194 Q${x + 18} 206 ${x + 32} 194" stroke="#fff" stroke-width="2" fill="none" opacity=".6"/>`).join('')}
     <g transform="translate(220 160)"><rect width="120" height="58" rx="6" fill="#FBF8F0" stroke="${INK}" stroke-width="1.6"/><path d="M14 30 Q30 10 46 30 T78 30 T106 30" stroke="#3CC7B8" stroke-width="5" fill="none" stroke-linecap="round"/></g>
   </g>
-  ${[300, 980].map((x) => `<g transform="translate(${x} 0)"><path d="M0 26 V80" stroke="${INK}" stroke-width="2"/><circle cx="0" cy="130" r="80" fill="url(#petshop-glow)"/>
+  ${[500, 1010].map((x) => `<g transform="translate(${x} 0)"><path d="M0 26 V80" stroke="${INK}" stroke-width="2"/><circle cx="0" cy="130" r="80" fill="url(#petshop-glow)"/>
     <path d="M-30 110 Q-28 82 0 80 Q28 82 30 110 Z" fill="#3CC7B8" stroke="${INK}" stroke-width="2"/><ellipse cx="0" cy="111" rx="16" ry="4" fill="#FFF4C4"/></g>`).join('')}`);
 
 // ---------- adoptable pets ----------
@@ -142,11 +142,11 @@ const pen = (id, x, look, name) => ({
     <path d="M20 60 H280" stroke="#D9C8A6" stroke-width="10" stroke-linecap="round"/>
     <path d="M20 60 H280" stroke="${INK}" stroke-width="1.4" opacity=".5"/>
     <ellipse cx="150" cy="176" rx="124" ry="26" fill="#BFE0DB"/><ellipse cx="150" cy="172" rx="100" ry="18" fill="#D5ECE8"/>
-    ${it.data.adopted ? '' : petPic(it.data.look, 65, 26)}
+    ${it.data.adopted ? '' : petPic(it.data.look, 65, -6)}
     ${Array.from({ length: 11 }, (_, i) => `<rect x="${14 + i * 27}" y="104" width="10" height="104" rx="4" fill="url(#petshop-penw)" stroke="${INK}" stroke-width="1.6"/>`).join('')}
     <rect x="6" y="110" width="288" height="12" rx="5" fill="url(#petshop-penw)" stroke="${INK}" stroke-width="1.8"/>
     <rect x="6" y="186" width="288" height="12" rx="5" fill="url(#petshop-penw)" stroke="${INK}" stroke-width="1.8"/>
-    ${tag(150, 136, name, it.data.adopted)}`),
+    ${tag(150, 146, name, it.data.adopted)}`),
 });
 
 // ---------- small things ----------
@@ -182,7 +182,7 @@ export const PETSHOP = {
   },
   stars: [{ id: 'petshop-sack', x: 368, y: 744 }],
   characters: [
-    { id: 'keeper', look: { ...NPC.leo, top: 'sweater', topColor: '#3CC7B8', collar: 'round', neck: 'none', bottom: 'widePants', bottomColor: '#4D5C9A', shoes: 'boots', shoesColor: '#2E2A3A' }, x: 1344, y: 248, s: 0.92, z: 30, drag: false,
+    { id: 'keeper', look: { ...NPC.leo, top: 'sweater', topColor: '#3CC7B8', collar: 'round', neck: 'none', bottom: 'widePants', bottomColor: '#4D5C9A', shoes: 'boots', shoesColor: '#2E2A3A' }, x: 1344, y: 216, s: 0.92, z: 30, drag: false,
       say: ['Welcome to Sunny Pets! 🐾', 'Tap a pet to adopt them 💜', 'Treats are in the jar! 🦴', 'Give a toy to your pet 🎾', 'Our fish love visitors! 🐠'] },
   ],
   items: [
