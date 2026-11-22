@@ -170,12 +170,18 @@ export const ROOM = {
     W('frame1', 'L', 4.9, 240, 0.9, 70, (it, sp) => `<rect width="${sp.len}" height="70" rx="4" fill="#2E3266" ${line}/><circle cx="${sp.len / 2}" cy="35" r="16" fill="${LILAC}"/><ellipse cx="${sp.len / 2}" cy="38" rx="28" ry="6" fill="none" stroke="${TEAL}" stroke-width="3"/>${starPath(sp.len - 10, 12, 5, SUN)}`),
     W('frame2', 'L', 6.0, 220, 0.6, 54, (it, sp) => `<rect width="${sp.len}" height="54" rx="4" fill="${CREAM}" ${line}/><path d="M6 44 L${sp.len / 2} 14 L${sp.len - 6} 44 Z" fill="${TEAL}"/>`),
     W('clock', 'R', 5.0, 250, 0.55, 36, (it, sp) => `<ellipse cx="${sp.len / 2}" cy="18" rx="${sp.len / 2}" ry="18" fill="#fff" ${line}/><path d="M${sp.len / 2} 18 V6 M${sp.len / 2} 18 H${sp.len / 2 + 9}" stroke="#3E3252" stroke-width="2.5"/>`),
-    W('poster', 'R', 0.55, 250, 1.2, 110, (it, sp) => `<rect width="${sp.len}" height="110" rx="4" fill="${SUN}" ${line}/><circle cx="${sp.len / 2}" cy="48" r="26" fill="${LILAC}"/><ellipse cx="${sp.len / 2}" cy="52" rx="44" ry="10" fill="none" stroke="${TEAL}" stroke-width="4"/>${text(sp.len / 2, 98, 'DREAM', 14, '#7A64B0')}`),
+    W('door', 'R', 0.75, 214, 1.35, 214, (it, sp) => { const w = sp.len; return `<rect x="-8" y="-8" width="${w + 16}" height="226" rx="4" fill="#FBF7EF" ${line}/>
+      <rect width="${w}" height="214" rx="3" fill="#C9A27A" ${line}/>
+      <rect x="10" y="12" width="${w - 20}" height="78" rx="4" fill="#B88F66" ${line}/><rect x="10" y="104" width="${w - 20}" height="96" rx="4" fill="#B88F66" ${line}/>
+      <circle cx="${w - 14}" cy="112" r="5" fill="${SUN}" ${line}/>
+      <rect x="${w / 2 - 34}" y="30" width="68" height="34" rx="8" fill="#fff" ${line}/>${text(w / 2, 53, 'Kitchen', 14, '#7A64B0')}`; },
+      { onTap: (it, api) => { api.sfx.click(); api.go('scene', { id: 'kitchen' }); } }),
+    W('poster', 'R', 5.75, 290, 1.2, 70, (it, sp) => `<rect width="${sp.len}" height="70" rx="4" fill="${SUN}" ${line}/><circle cx="${sp.len / 2 - 22}" cy="35" r="18" fill="${LILAC}"/><ellipse cx="${sp.len / 2 - 22}" cy="38" rx="30" ry="7" fill="none" stroke="${TEAL}" stroke-width="3"/>${text(sp.len / 2 + 24, 41, 'DREAM', 13, '#7A64B0')}`),
     W('shelf', 'L', 3.0, 190, 1.2, 18, (it, sp) => `<rect y="12" width="${sp.len}" height="8" rx="2" fill="${WOOD}" ${line}/><path d="M14 12 v-16 h14 v16 M40 12 q0 -24 12 -24 q12 0 12 24" fill="${TEAL}" ${line}/>`),
 
     I('rug', 2.4, 2.2, 3, 2.6, rug, { floor: true }),
     I('bookshelf', 0, 0.9, 0.7, 2, bookshelf),
-    I('flamp', 0.1, 0.1, 0.6, 0.6, floorLamp, { data: { on: true }, onTap: (it, api) => { it.data.on = !it.data.on; api.setArt(it); api.sfx.click(); } }),
+    I('flamp', 4.85, 0.1, 0.6, 0.6, floorLamp, { data: { on: true }, onTap: (it, api) => { it.data.on = !it.data.on; api.setArt(it); api.sfx.click(); } }),
     I('bed', 0, 4.6, 3, 2, bed, { surface: 52 }),
     I('nightstand', 0.05, 3.5, 1, 1, nightstand, { surface: 60 }),
     I('desk', 2.4, 0.05, 2.2, 1, desk, { surface: 82 }),

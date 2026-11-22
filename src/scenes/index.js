@@ -20,9 +20,10 @@ import { BAKERY } from './bakery.js';
 import { WORKSHOP } from './workshop.js';
 import { SPRINGS } from './springs.js';
 import { FUNFAIR } from './funfair.js';
+import { KITCHEN } from './kitchen.js';
 
 export const SCENES = {
-  sunny: MAP, home: ROOM, cafe: CAFE, beach: BEACH, park: PARK, boutique: BOUTIQUE, gym: GYM, games: GAMES,
+  sunny: MAP, home: ROOM, kitchen: KITCHEN, cafe: CAFE, beach: BEACH, park: PARK, boutique: BOUTIQUE, gym: GYM, games: GAMES,
   salon: SALON, petshop: PETSHOP, studio: STUDIO, funfair: FUNFAIR, bakery: BAKERY, workshop: WORKSHOP,
   winter: WINTER_MAP, cabin: CABIN, market: MARKET, rink: RINK, hill: HILL, lookout: LOOKOUT, springs: SPRINGS,
 };
