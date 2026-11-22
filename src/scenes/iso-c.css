@@ -1,0 +1,13 @@
+/* Isometric outdoor places (beach, park, fun fair). Link after style.css and sunny-extra.css. Classes are prefixed ic-. */
+
+/* Park swings: each seat swings from its top bar when the frame gets the .swinging class. */
+.item .ic-seat { transform-box: fill-box; transform-origin: 50% 0; }
+.item.swinging .ic-seat { animation: swing 2.2s ease-in-out; }
+
+/* Beach sailboat bobbing on the water. */
+.item .ic-bob { transform-box: fill-box; transform-origin: 50% 100%; animation: ic-bob 3.2s ease-in-out infinite; }
+@keyframes ic-bob { 0%, 100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-4px) rotate(1.5deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .item .ic-bob { animation: none; }
+}
