@@ -596,3 +596,5 @@ body { -webkit-touch-callout: none; }
     linear-gradient(to bottom, transparent 72%, rgba(40, 28, 70, 0.08));
 }
 .wheel-spin { animation: sunspin 24s linear infinite; }
+.scene-light.iso { background: radial-gradient(ellipse 120% 95% at 50% 45%, transparent 60%, rgba(46, 34, 80, 0.16) 100%); }
+.scene-light.iso::after { opacity: 0.1; }
