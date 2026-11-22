@@ -261,7 +261,7 @@ export function sceneScreen(app, ctx, def) {
   // Characters are either island friends (look in the scene file) or your own saved characters (charId).
   const lookOf = (i) => (i.def.charId ? getChar(i.def.charId)?.look : i.def.look) || {};
   function addCharacter(c) {
-    const s = c.s || 1;
+    const s = c.s || (R ? R.charScale : 1);
     const pet = c.kind === 'pet';
     const it = add({
       id: c.id, x: c.x, y: c.y, w: (pet ? 170 : 170) * s, h: (pet ? 147 : 332) * s, z: c.z ?? 60,

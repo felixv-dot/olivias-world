@@ -113,3 +113,38 @@ export function wallSpot(r, side, t0, up, wTiles, hPx) {
 export function wallArt(spot, body) {
   return `<svg viewBox="0 0 ${spot.w} ${spot.h}" width="100%" height="100%" overflow="visible"><g transform="${spot.matrix}">${body}</g></svg>`;
 }
+
+// ---------- outdoor ground: a floating diorama slab (grass, sand, snow, stone…) ----------
+// `top` = ground colour, `pattern` = optional <pattern> id for the top, sides = soil layers.
+export function groundShell(r, { top, pattern = '', sideL = '#B98A5E', sideR = '#A27650', layer = '#8B6450', depth = 46, edge = '' }) {
+  const B = proj(r, 0, 0), Rr = proj(r, r.cols, 0), F = proj(r, r.cols, r.rows), Ll = proj(r, 0, r.rows);
+  const dn = ([x, y], d = depth) => [x, y + d];
+  return `
+    <ellipse cx="${(Ll[0] + Rr[0]) / 2}" cy="${F[1] + depth + 26}" rx="${(Rr[0] - Ll[0]) * 0.46}" ry="34" fill="#3E3252" opacity=".10"/>
+    <polygon points="${pts([Ll, F, dn(F), dn(Ll)])}" fill="${sideL}" ${LINE}/>
+    <polygon points="${pts([F, Rr, dn(Rr), dn(F)])}" fill="${sideR}" ${LINE}/>
+    <polygon points="${pts([dn(Ll, depth * 0.55), dn(F, depth * 0.55), dn(F), dn(Ll)])}" fill="${layer}" opacity=".55"/>
+    <polygon points="${pts([dn(F, depth * 0.55), dn(Rr, depth * 0.55), dn(Rr), dn(F)])}" fill="${layer}" opacity=".7"/>
+    <polygon points="${pts([B, Rr, F, Ll])}" fill="${top}" ${LINE}/>
+    ${pattern ? `<polygon points="${pts([B, Rr, F, Ll])}" fill="url(#${pattern})"/>` : ''}
+    ${edge ? `<polyline points="${pts([Ll, F, Rr])}" fill="none" stroke="${edge}" stroke-width="7" stroke-linecap="round"/>` : ''}`;
+}
+
+// A flat shape lying on the floor/ground, given in floor tiles (e.g. a path, water, a rug area).
+// points: [[gx, gy], ...] → SVG polygon in scene coordinates.
+export function floorPoly(r, points, attrs = '') {
+  return `<polygon points="${pts(points.map(([gx, gy]) => proj(r, gx, gy)))}" ${attrs}/>`;
+}
+
+// ---------- scene item helpers (use these in place definitions) ----------
+// Furniture / props standing on the floor grid. `build(it)` returns an isoItem(...) (re-run on state changes).
+export function isoDef(id, gx, gy, fw, fd, build, extra = {}) {
+  const probe = build({ data: extra.data || {} });
+  return { id, gx, gy, fw, fd, w: probe.w, h: probe.h, ax: probe.ax, ay: probe.ay, art: (it, api) => build(it, api).svg, ...extra };
+}
+// Something hung on a back wall: side 'L' or 'R', t0 = start along the wall (tiles), up = top edge height (px).
+// body(it, spot, api) draws in wall-local coords: x 0..spot.len, y 0..hPx.
+export function wallDef(r, id, side, t0, up, wTiles, hPx, body, extra = {}) {
+  const sp = wallSpot(r, side, t0, up, wTiles, hPx);
+  return { id, x: sp.x, y: sp.y, w: sp.w, h: sp.h, drag: false, z: 4, art: (it, api) => wallArt(sp, typeof body === 'function' ? body(it, sp, api) : body), ...extra };
+}

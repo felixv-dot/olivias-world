@@ -1,5 +1,5 @@
 // Olivia's room — the first isometric "dollhouse from above" room (Unpacking-style prototype).
-import { room, roomShell, isoItem, at, shades, wallSpot, wallArt, proj, TW, TH } from '../iso.js';
+import { room, roomShell, isoItem, at, shades, proj, isoDef, wallDef } from '../iso.js';
 import { svg, text, starPath, stringLights, wearable } from './common.js';
 
 const R = room({ cols: 8, rows: 7, ox: 768, oy: 384, wallH: 300 });
@@ -141,16 +141,8 @@ const succulent = () => isoItem(0.3, 0.3, 50, [
   { svg: (() => { const [cx, cy] = at(0.15, 0.15, 18); return `<path d="M${cx} ${cy} Q${cx - 16} ${cy - 18} ${cx - 8} ${cy - 30} Q${cx} ${cy - 16} ${cx} ${cy} Q${cx + 4} ${cy - 30} ${cx + 12} ${cy - 26} Q${cx + 12} ${cy - 10} ${cx} ${cy} Z" fill="#6DBE7A" ${line}/>`; })(), w: 0.3, d: 0.3, u: 0.15, v: 0.15, z: 50 },
 ]);
 
-// iso item definition helper: art comes from an isoItem builder (re-run for state changes).
-function I(id, gx, gy, fw, fd, build, extra = {}) {
-  const probe = build({ data: extra.data || {} });
-  return { id, gx, gy, fw, fd, w: probe.w, h: probe.h, ax: probe.ax, ay: probe.ay, art: (it) => build(it).svg, ...extra };
-}
-// things hung on the back walls
-function W(id, side, t0, up, wTiles, hPx, body, extra = {}) {
-  const sp = wallSpot(R, side, t0, up, wTiles, hPx);
-  return { id, x: sp.x, y: sp.y, w: sp.w, h: sp.h, drag: false, z: 4, art: (it, api) => wallArt(sp, typeof body === 'function' ? body(it, sp, api) : body), ...extra };
-}
+const I = isoDef;
+const W = (...a) => wallDef(R, ...a);
 
 const windowBody = (it, sp, api) => {
   const sunny = api?.state.weather !== 'rain';
@@ -210,6 +202,6 @@ export const ROOM = {
     I('plushie', 0.4, 5.4, 0.4, 0.4, plushie, { small: true, gz: 52, onTap: (it, api) => { it.el.classList.remove('boing'); void it.el.offsetWidth; it.el.classList.add('boing'); api.bubble(it.x + it.w / 2, it.y, '♥'); } }),
     I('books', 0.35, 3.75, 0.4, 0.3, books, { small: true, gz: 60 }),
     I('succulent', 0.6, 3.6, 0.3, 0.3, succulent, { small: true, gz: 60 }),
-    { ...wearable('cap', 0, 0, 'room-cap'), gx: 6.2, gy: 3.2, fw: 0.4, fd: 0.4, ax: 65, ay: 60 },
+    wearable('cap', 0, 0, 'room-cap', { gx: 6.2, gy: 3.2 }),
   ],
 };

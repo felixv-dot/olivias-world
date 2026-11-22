@@ -95,10 +95,12 @@ const FOOD = {
   marshmallow: { w: 120, h: 40, text: 'Toasty marshmallow! 🔥', art: `<path d="M0 24 H80" stroke="#8B6450" stroke-width="5" stroke-linecap="round"/><rect ${O} x="76" y="6" width="36" height="30" rx="10" fill="#F0C27A"/><path d="M80 12 Q94 6 108 12" stroke="#C9913A" stroke-width="4" fill="none"/>` },
   juice: { w: 50, h: 84, text: 'Orange juice! 🧃', art: `<rect ${O} x="6" y="16" width="38" height="64" rx="6" fill="#F5DE7A"/><path ${O} d="M30 16 L36 0" style="stroke-width:4"/><circle cx="25" cy="48" r="11" fill="#F0B35A"/><path d="M20 44 L30 52 M30 44 L20 52" stroke="#fff" stroke-width="2"/>` },
 };
-export function food(api, kind, x, y) {
+// In isometric rooms pass `iso: { gx, gy, gz }` (floor tile + height, e.g. a table's surface) instead of screen x/y.
+export function food(api, kind, x, y, iso = null) {
   const f = FOOD[kind];
   const it = api.add({
-    id: api.uid(kind), x, y, w: f.w, h: f.h, cls: 'food',
+    id: api.uid(kind), x, y, w: f.w, h: f.h, cls: 'food', small: true,
+    ...(iso ? { gx: iso.gx, gy: iso.gy, gz: iso.gz || 0, fw: 0.3, fd: 0.3, ax: f.w / 2, ay: f.h - 4 } : {}),
     art: () => svg(f.w, f.h, f.art),
     onGive: (i, a, who) => a.eat(i, who, f.text),
   }, { spawned: true });
@@ -115,9 +117,13 @@ const WEAR = {
   scarf: { w: 140, h: 110, key: 'neck', text: 'Snug as a bug! 🧣', art: `<path ${O} d="M10 20 Q70 50 130 20 L130 44 Q70 74 10 44 Z" fill="#F5DE7A"/><path ${O} d="M90 50 L104 106 L82 108 L74 54 Z" fill="#F5DE7A"/><path d="M20 30 Q70 56 120 30 M92 70 L76 74 M96 90 L80 92" stroke="#fff" stroke-width="5" opacity=".6" fill="none"/>` },
   cap: { w: 130, h: 70, key: 'hat', text: 'Nice cap! 🧢', art: `<path ${O} d="M14 56 C10 6 110 6 106 56 Z" fill="#8FC3F0"/><path ${O} d="M10 54 Q60 44 124 52 Q120 66 64 66 Q14 66 10 54 Z" fill="#6FA8DC"/><circle ${O} cx="60" cy="10" r="5" fill="#8FC3F0"/>` },
 };
-export function wearable(kind, x, y, id = 'wear-' + kind) {
+// In isometric rooms pass `iso: { gx, gy, gz }` to stand it on the floor or on furniture.
+export function wearable(kind, x, y, id = 'wear-' + kind, iso = null) {
   const f = WEAR[kind];
-  return { id, x, y, w: f.w, h: f.h, cls: 'wearable', wear: [f.key, kind], wearText: f.text, art: () => svg(f.w, f.h, f.art) };
+  return {
+    id, x, y, w: f.w, h: f.h, cls: 'wearable', small: true, wear: [f.key, kind], wearText: f.text, art: () => svg(f.w, f.h, f.art),
+    ...(iso ? { gx: iso.gx, gy: iso.gy, gz: iso.gz || 0, fw: 0.4, fd: 0.4, ax: f.w / 2, ay: f.h - 4 } : {}),
+  };
 }
 
 // ---------- other characters on the island ----------
