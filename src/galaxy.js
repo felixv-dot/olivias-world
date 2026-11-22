@@ -136,7 +136,7 @@ export function galaxyScreen(app, ctx) {
   const anim = animate(() => meAvatar.firstElementChild);
   meAvatar.onclick = () => anim.happy();
 
-  root.append(el('div', 'version', 'v1.7'));
+  root.append(el('div', 'version', 'v1.8'));
   root.append(rotateHint());
   const tip = installTip();
   if (tip) root.append(tip);
