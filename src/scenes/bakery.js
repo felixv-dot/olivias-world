@@ -1,72 +1,55 @@
-// Snowflake Bakery: bake bread, pie and cinnamon rolls in the oven, decorate a cake at the dough table,
-// take a pastry from the display case, puff flour out of the sacks, a sleepy cat and the baker Hanna.
-import { INK, O, svg, text, starPath, winterWindow, food, NPC_WINTER } from './common.js';
+// Snowflake Bakery — isometric dollhouse version: bake bread, pie and cinnamon rolls in the oven, decorate a cake
+// at the marble island, take a pastry from the display case, puff flour out of the sacks, a sleepy cat and Hanna the baker.
+import { room, roomShell, isoItem, at, shades, proj, isoDef, wallDef } from '../iso.js';
+import { INK, svg, text, starPath, pine, food, NPC_WINTER } from './common.js';
 import { darker, lighter } from '../avatar.js';
 import { CLIMATES } from '../ui.js';
 
+const R = room({ cols: 9, rows: 8, ox: 768, oy: 312, wallH: 280 });
+R.charScale = 0.6;
+
+const WOOD = '#C99A6C', WOOD_D = '#8B6450', CREAM = '#FBF7EF', LILAC = '#B79CF0', TEAL = '#7FCFC4', SKY = '#9CC8EE', SUN = '#F5DE7A';
+const line = 'stroke="#3E3252" stroke-opacity=".5" stroke-width="1.4"';
 const O2 = 'class="o" style="stroke-width:2"';
-const tag = (x, y, t, w = 180) => `<rect x="${x - w / 2}" y="${y - 19}" width="${w}" height="36" rx="18" fill="#FFFDF7" fill-opacity=".94" stroke="${INK}" stroke-width="2"/>${text(x, y + 7, t, 18, '#7A64B0')}`;
+const pp = (arr) => arr.map((p) => p.map((n) => n.toFixed(1)).join(',')).join(' ');
+const P = (u, v, z, fn, w = 0.1, d = 0.1) => ({ svg: fn(...at(u, v, z)), u, v, z, w, d });
 const shadow = (cx, cy, rx, ry = 10, op = 0.14) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${INK}" opacity="${op}"/>`;
 const flake = (x, y, r, col = '#fff', sw = 2) => `<g stroke="${col}" stroke-width="${sw}" stroke-linecap="round">${[0, 60, 120].map((a) => {
   const dx = Math.cos((a * Math.PI) / 180) * r, dy = Math.sin((a * Math.PI) / 180) * r;
   return `<path d="M${(x - dx).toFixed(1)} ${(y - dy).toFixed(1)} L${(x + dx).toFixed(1)} ${(y + dy).toFixed(1)}"/>`;
 }).join('')}</g>`;
+const bump = (it, cls) => { it.el.classList.remove(cls); void it.el.offsetWidth; it.el.classList.add(cls); };
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+const clampG = (gx, gy, f = 0.3) => ({ gx: Math.max(0, Math.min(R.cols - f, gx)), gy: Math.max(0, Math.min(R.rows - f, gy)) });
 
-// ---------- room ----------
-const VP = [800, 250];
-const planks = () => {
-  let s = '';
-  for (let i = -6; i <= 26; i++) {
-    const xb = i * 90 - 300, t = (620 - VP[1]) / (900 - VP[1]);
-    s += `<path d="M${(VP[0] + (xb - VP[0]) * t).toFixed(1)} 620 L${xb} 900"/>`;
-  }
-  return s + [648, 682, 724, 776, 838].map((y) => `<path d="M0 ${y} H1600" opacity=".5"/>`).join('');
-};
-
-const bg = ({ weather }) => svg(1600, 900, `
+// ---------- background: backdrop + bakery shell (plaster walls, tiled band, checker floor) ----------
+const bg = ({ weather }) => {
+  const snow = weather !== 'clear';
+  const [lx] = proj(R, 0, R.rows), [rx] = proj(R, R.cols, 0), [, fy] = proj(R, R.cols, R.rows);
+  const band = (side, z0, z1) => side === 'R'
+    ? pp([proj(R, 0, 0, z0), proj(R, R.cols, 0, z0), proj(R, R.cols, 0, z1), proj(R, 0, 0, z1)])
+    : pp([proj(R, 0, R.rows, z0), proj(R, 0, 0, z0), proj(R, 0, 0, z1), proj(R, 0, R.rows, z1)]);
+  return svg(1600, 900, `
   <defs>
-    <linearGradient id="bk-wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F8EFDD"/><stop offset="1" stop-color="#F0E1C4"/></linearGradient>
-    <pattern id="bk-plaster" width="90" height="90" patternUnits="userSpaceOnUse"><circle cx="12" cy="20" r="1.4" fill="#E3D0AE"/><circle cx="60" cy="50" r="1.1" fill="#E8D7B9"/><circle cx="34" cy="76" r="1.6" fill="#E5D3B3"/><circle cx="80" cy="12" r="1" fill="#E3D0AE"/></pattern>
-    <pattern id="bk-tile" width="64" height="32" patternUnits="userSpaceOnUse"><rect width="64" height="32" fill="#C9DCEA"/>
-      <rect x="1.5" y="1.5" width="61" height="13" rx="3" fill="#E6F0F7"/><rect x="-31" y="17.5" width="61" height="13" rx="3" fill="#E1EDF6"/><rect x="33.5" y="17.5" width="61" height="13" rx="3" fill="#E1EDF6"/>
-      <path d="M6 5 H30" stroke="#fff" stroke-width="2" opacity=".7"/></pattern>
-    <linearGradient id="bk-wain" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ABD3CE"/><stop offset="1" stop-color="#8DBBB6"/></linearGradient>
-    <linearGradient id="bk-floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BF946D"/><stop offset="1" stop-color="#DDB892"/></linearGradient>
-    <linearGradient id="bk-contact" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${INK}" stop-opacity=".3"/><stop offset="1" stop-color="${INK}" stop-opacity="0"/></linearGradient>
-    <linearGradient id="bk-beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF4C8" stop-opacity=".6"/><stop offset="1" stop-color="#FFF4C8" stop-opacity="0"/></linearGradient>
-    <radialGradient id="bk-halo"><stop offset="0" stop-color="#FFF3C2" stop-opacity=".7"/><stop offset="1" stop-color="#FFF3C2" stop-opacity="0"/></radialGradient>
-    <radialGradient id="bk-lampglow"><stop offset="0" stop-color="#FFE6A0" stop-opacity=".75"/><stop offset="1" stop-color="#FFE6A0" stop-opacity="0"/></radialGradient>
-    <linearGradient id="bk-shade" x1="0" x2="1"><stop offset="0" stop-color="#5FA7A0"/><stop offset=".4" stop-color="#9EDDD4"/><stop offset="1" stop-color="#5FA7A0"/></linearGradient>
-    <linearGradient id="bk-shelf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D2A77D"/><stop offset="1" stop-color="#A97E58"/></linearGradient>
-    <linearGradient id="bk-jar" x1="0" x2="1"><stop offset="0" stop-color="#DCEBF5" stop-opacity=".9"/><stop offset=".3" stop-color="#FFFFFF" stop-opacity=".9"/><stop offset="1" stop-color="#C9DCEA" stop-opacity=".9"/></linearGradient>
+    <radialGradient id="bk-bd" cx="50%" cy="55%" r="70%"><stop offset="0" stop-color="#FBF7F0"/><stop offset="1" stop-color="#E6DDEE"/></radialGradient>
+    <pattern id="bk-wl" width="90" height="90" patternUnits="userSpaceOnUse" patternTransform="matrix(1,-0.5,0,1,0,0)"><rect width="90" height="90" fill="#F7EEDC"/><circle cx="12" cy="20" r="1.6" fill="#E8D7B9"/><circle cx="60" cy="50" r="1.3" fill="#EADBC0"/><circle cx="34" cy="76" r="1.8" fill="#E5D3B3"/></pattern>
+    <pattern id="bk-wr" width="90" height="90" patternUnits="userSpaceOnUse" patternTransform="matrix(1,0.5,0,1,0,0)"><rect width="90" height="90" fill="#F1E6D2"/><circle cx="12" cy="20" r="1.6" fill="#E3D0AE"/><circle cx="60" cy="50" r="1.3" fill="#E5D4B6"/><circle cx="34" cy="76" r="1.8" fill="#E0CCA8"/></pattern>
+    <pattern id="bk-tl" width="32" height="24" patternUnits="userSpaceOnUse" patternTransform="matrix(1,-0.5,0,1,0,0)"><rect width="32" height="24" fill="#FFFFFF"/><rect x="1.5" y="1.5" width="29" height="21" rx="3" fill="#D9EAF4"/><path d="M5 5 H16" stroke="#fff" stroke-width="2" opacity=".8"/></pattern>
+    <pattern id="bk-tr" width="32" height="24" patternUnits="userSpaceOnUse" patternTransform="matrix(1,0.5,0,1,0,0)"><rect width="32" height="24" fill="#F4F8FB"/><rect x="1.5" y="1.5" width="29" height="21" rx="3" fill="#CFE2EE"/><path d="M5 5 H16" stroke="#fff" stroke-width="2" opacity=".8"/></pattern>
+    <pattern id="bk-fl" width="2" height="2" patternUnits="userSpaceOnUse" patternTransform="matrix(64,32,-64,32,${R.ox},${R.oy})"><rect width="2" height="2" fill="#F3EADB"/><rect width="1" height="1" fill="#CFE0EC"/><rect x="1" y="1" width="1" height="1" fill="#CFE0EC"/></pattern>
+    <linearGradient id="bk-light" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF6DA" stop-opacity=".6"/><stop offset="1" stop-color="#FFF6DA" stop-opacity="0"/></linearGradient>
+    <radialGradient id="bk-warm"><stop offset="0" stop-color="#FFD9A0" stop-opacity=".45"/><stop offset="1" stop-color="#FFD9A0" stop-opacity="0"/></radialGradient>
   </defs>
-  <rect width="1600" height="620" fill="url(#bk-wall)"/><rect width="1600" height="620" fill="url(#bk-plaster)"/>
-  <rect x="24" y="96" width="430" height="524" fill="url(#bk-tile)"/>
-  <path d="M24 620 V96 H454 V620" fill="none" stroke="#D8C29C" stroke-width="8"/><path d="M28 100 H450" stroke="#fff" stroke-width="2" opacity=".6"/>
-  <rect x="454" y="432" width="1146" height="188" fill="url(#bk-wain)"/>
-  ${Array.from({ length: 8 }, (_, i) => `<rect x="${478 + i * 142}" y="454" width="118" height="140" rx="6" fill="none" stroke="#7DAAA5" stroke-width="2.5"/><path d="M${482 + i * 142} 590 V458 H${592 + i * 142}" fill="none" stroke="#fff" stroke-width="2" opacity=".35"/>`).join('')}
-  <rect x="454" y="420" width="1146" height="16" rx="4" fill="#F7ECD7" stroke="#CDB690" stroke-width="2"/>
-  <g transform="translate(800 48)">${text(0, 0, 'Snowflake Bakery', 34, '#7A64B0')}${flake(-170, -10, 11, '#9EDDD4', 3)}${flake(170, -10, 11, '#9EDDD4', 3)}</g>
-  <ellipse cx="790" cy="215" rx="250" ry="180" fill="url(#bk-halo)" opacity="${weather === 'snow' ? 0.55 : 1}"/>
-  ${winterWindow(640, 100, 300, 220, weather, '#C9B8F2')}
-  <g transform="translate(1150 300)">
-    <rect x="0" y="0" width="420" height="16" rx="4" fill="url(#bk-shelf)" stroke="${INK}" stroke-width="2"/>
-    <path d="M40 16 L40 42 L66 16 M380 16 L380 42 L354 16" fill="none" stroke="#8B6450" stroke-width="5" stroke-linejoin="round"/>
-    ${[[24, 'FLOUR', '#FBF7EF'], [96, 'SUGAR', '#FFFFFF'], [168, '', '#C9B8F2']].map(([x, l, c]) => `<rect x="${x}" y="-66" width="56" height="66" rx="10" fill="url(#bk-jar)" stroke="${INK}" stroke-width="2"/>
-      <rect x="${x + 4}" y="-40" width="48" height="36" rx="7" fill="${c}"/>${c === '#C9B8F2' ? `<g fill="#9EDDD4">${[0, 1, 2, 3].map((k) => `<circle cx="${x + 12 + k * 11}" cy="${-20 + (k % 2) * 8}" r="4"/>`).join('')}</g>` : ''}
-      <rect x="${x - 2}" y="-76" width="60" height="12" rx="4" fill="#C99772" stroke="${INK}" stroke-width="2"/>
-      ${l ? text(x + 28, -46, l, 11, '#7A64B0', 500) : ''}<path d="M${x + 8} -58 V-8" stroke="#fff" stroke-width="3" opacity=".6"/>`).join('')}
-    <g transform="translate(250 0)"><ellipse cx="50" cy="-4" rx="46" ry="6" fill="#E7E2EF" stroke="${INK}" stroke-width="2"/><ellipse cx="50" cy="-10" rx="46" ry="6" fill="#F4F1FA" stroke="${INK}" stroke-width="2"/><ellipse cx="50" cy="-16" rx="46" ry="6" fill="#FFFFFF" stroke="${INK}" stroke-width="2"/></g>
-    <g transform="translate(352 0)"><path d="M6 0 H54 L44 -10 H16 Z" fill="#E7E2EF" stroke="${INK}" stroke-width="2"/><path d="M14 -10 Q30 -74 46 -10 Z" fill="#E8F2F8" fill-opacity=".7" stroke="${INK}" stroke-width="2"/><circle cx="30" cy="-48" r="4" fill="#C99772"/><path d="M22 -12 Q24 -40 30 -52" stroke="#fff" stroke-width="3" fill="none" opacity=".8"/></g>
-  </g>
-  ${[1250, 1470].map((x) => `<path d="M${x} 0 V110" stroke="${INK}" stroke-width="2.5"/><circle cx="${x}" cy="170" r="120" fill="url(#bk-lampglow)"/>
-    <path d="M${x - 42} 152 Q${x - 38} 110 ${x} 108 Q${x + 38} 110 ${x + 42} 152 Z" fill="url(#bk-shade)" stroke="${INK}" stroke-width="2.5"/>
-    <ellipse cx="${x}" cy="152" rx="42" ry="7" fill="#FFF3C2" stroke="${INK}" stroke-width="2"/><circle cx="${x}" cy="158" r="9" fill="#FFF8DE"/>`).join('')}
-  <rect y="620" width="1600" height="280" fill="url(#bk-floor)"/>
-  <g stroke="#A47A55" stroke-width="2" opacity=".5" fill="none">${planks()}</g>
-  <path d="M650 622 L930 622 L1080 880 L520 880 Z" fill="url(#bk-beam)" opacity="${weather === 'snow' ? 0.45 : 0.9}"/>
-  <rect x="0" y="598" width="1600" height="24" fill="#A57F5C"/><path d="M0 600 H1600" stroke="#C9A27C" stroke-width="3"/>
-  <rect y="622" width="1600" height="44" fill="url(#bk-contact)"/>`);
+  <rect width="1600" height="900" fill="url(#bk-bd)"/>
+  ${snow ? `<g fill="#fff" opacity=".9">${Array.from({ length: 64 }, (_, i) => `<circle cx="${(i * 97 + 41) % 1600}" cy="${(i * 61 + 23) % 900}" r="${2 + (i % 3)}"/>`).join('')}</g>` : '<circle cx="1440" cy="110" r="120" fill="#FFF6D2" opacity=".35"/><circle cx="1440" cy="110" r="54" fill="#FFF3C4" opacity=".9"/>'}
+  <ellipse cx="${(lx + rx) / 2}" cy="${fy + 6}" rx="580" ry="46" fill="#3E3252" opacity=".10"/>
+  ${roomShell(R, { floor: '#F3EADB', floorPattern: 'bk-fl', wallL: '#F7EEDC', wallR: '#F1E6D2', wallPatternL: 'bk-wl', wallPatternR: 'bk-wr', base: '#C9A57C' })}
+  <polygon points="${band('L', 18, 128)}" fill="url(#bk-tl)"/><polygon points="${band('R', 18, 128)}" fill="url(#bk-tr)"/>
+  <polygon points="${band('L', 128, 136)}" fill="#E9D9BE" ${line}/><polygon points="${band('R', 128, 136)}" fill="#E2D0B2" ${line}/>
+  <polygon points="${pp([proj(R, 0, R.rows), proj(R, 0, 0), proj(R, R.cols, 0), proj(R, R.cols, 0.6), proj(R, 0.6, 0.6), proj(R, 0.6, R.rows)])}" fill="#3E3252" opacity=".06"/>
+  <polygon points="${pp([proj(R, 3.0, 0.05), proj(R, 5.2, 0.05), proj(R, 6.8, 3.0), proj(R, 4.6, 3.0)])}" fill="url(#bk-light)" opacity="${snow ? 0.4 : 1}"/>
+  <ellipse cx="${proj(R, 1.9, 1.6)[0]}" cy="${proj(R, 1.9, 1.6)[1]}" rx="190" ry="96" fill="url(#bk-warm)"/>`);
+};
 
 // ---------- baked goods ----------
 const BAKED = {
@@ -95,10 +78,12 @@ const BAKED = {
     <path d="M16 26 Q30 8 44 22" fill="none" stroke="#fff" stroke-width="2.5" opacity=".4" stroke-linecap="round"/>
     <g fill="#fff">${[[16, 36], [30, 14], [62, 14], [78, 34], [46, 42], [24, 56], [70, 56]].map(([x, y]) => `<rect x="${x}" y="${y}" width="3.5" height="3.5" rx="1" transform="rotate(30 ${x} ${y})"/>`).join('')}</g>` },
 };
-function baked(api, kind, x, y) {
-  const f = BAKED[kind];
+// In the isometric bakery treats land on a surface: spot = { gx, gy, gz }.
+function baked(api, kind, spot) {
+  const f = BAKED[kind], k = 0.8;
   return api.add({
-    id: api.uid(kind), x, y, w: f.w, h: f.h, cls: 'food',
+    id: api.uid(kind), x: 0, y: 0, w: f.w * k, h: f.h * k, cls: 'food', small: true,
+    gx: spot.gx, gy: spot.gy, gz: spot.gz || 0, fw: 0.3, fd: 0.3, ax: (f.w * k) / 2, ay: f.h * k - 4,
     art: () => svg(f.w, f.h, f.art),
     onGive: (i, a, who) => a.eat(i, who, f.text, ['✨', '😋', '💜']),
   }, { spawned: true });
@@ -210,222 +195,351 @@ function cakeGame(api, table) {
       close();
       api.sfx.yum();
       const n = api.count('cake');
+      const top = table.def.surface || 0;
       const it = api.add({
-        id: api.uid('cake'), x: table.x + 250 - (n % 3) * 70, y: table.y - 62, w: 120, h: 109, cls: 'food',
+        id: api.uid('cake'), x: 0, y: 0, w: 96, h: 87, cls: 'food', small: true,
+        gx: table.gx + 1.85 - (n % 3) * 0.5, gy: table.gy + 0.5, gz: top, fw: 0.36, fd: 0.36, ax: 48, ay: 83,
         art: () => svg(220, 200, cakeBody(design, u)),
         onGive: (i, a, who) => a.eat(i, who, 'The most beautiful cake! 🎂', ['🎂', '✨', '💜']),
       }, { spawned: true });
-      api.sparkle(it.x + 60, it.y + 50, ['✨', '🎂', '⭐']);
-      api.bubble(it.x + 60, it.y - 20, 'What a cake! Give it to a friend 🎂');
-      if (!api.starFound('bakery-cake')) api.addStar('bakery-cake', table.x + 330, table.y - 200, { spawned: true });
+      api.sparkle(it.x + 48, it.y + 40, ['✨', '🎂', '⭐']);
+      api.bubble(it.x + 48, it.y - 20, 'What a cake! Give it to a friend 🎂');
+      if (!api.starFound('bakery-cake')) api.addStar('bakery-cake', 0, 0, { spawned: true, gx: table.gx + 1.3, gy: table.gy + 0.05, gz: top });
     };
     refresh();
   });
 }
 
-// ---------- props ----------
-const ovenArt = () => svg(380, 470, `
-  <defs>
-    <linearGradient id="bk-enamel" x1="0" x2="1"><stop offset="0" stop-color="#9C8BC6"/><stop offset=".22" stop-color="#CFC2EC"/><stop offset=".6" stop-color="#B7A8DE"/><stop offset="1" stop-color="#8F7EBB"/></linearGradient>
-    <linearGradient id="bk-enamel2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B9AADF"/><stop offset="1" stop-color="#9F8ECB"/></linearGradient>
-    <linearGradient id="bk-steel" x1="0" x2="1"><stop offset="0" stop-color="#AEB8C8"/><stop offset=".35" stop-color="#F2F5F9"/><stop offset="1" stop-color="#A3AEBF"/></linearGradient>
-    <linearGradient id="bk-brass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6DEA2"/><stop offset="1" stop-color="#C39A52"/></linearGradient>
-    <radialGradient id="bk-ovenglow" cx=".5" cy=".7" r=".7"><stop offset="0" stop-color="#FFD98A"/><stop offset=".55" stop-color="#F3A35A"/><stop offset="1" stop-color="#C8643A" stop-opacity=".2"/></radialGradient>
-  </defs>
-  <rect x="160" y="-176" width="60" height="226" fill="url(#bk-steel)" stroke="${INK}" stroke-width="2"/>
-  ${[-120, -40].map((y) => `<rect x="154" y="${y}" width="72" height="12" rx="4" fill="url(#bk-steel)" stroke="${INK}" stroke-width="2"/>`).join('')}
-  ${shadow(190, 462, 180, 12, 0.2)}
-  <rect x="30" y="30" width="320" height="70" rx="14" fill="url(#bk-enamel2)" stroke="${INK}" stroke-width="2.4"/>
-  ${[96, 284].map((x) => `<circle cx="${x}" cy="65" r="13" fill="url(#bk-brass)" stroke="${INK}" stroke-width="2"/><path d="M${x} 56 V64" stroke="${INK}" stroke-width="2.4" stroke-linecap="round"/>`).join('')}
-  <circle cx="190" cy="65" r="24" fill="#FBF7EF" stroke="${INK}" stroke-width="2.4"/>
-  <g stroke="#B7A8DE" stroke-width="2">${Array.from({ length: 12 }, (_, i) => { const a = (i / 12) * Math.PI * 2; return `<path d="M${(190 + Math.cos(a) * 17).toFixed(1)} ${(65 + Math.sin(a) * 17).toFixed(1)} L${(190 + Math.cos(a) * 21).toFixed(1)} ${(65 + Math.sin(a) * 21).toFixed(1)}"/>`; }).join('')}</g>
-  <g class="wx-dial"><circle cx="190" cy="65" r="22" fill="none"/><path d="M190 65 L190 49" stroke="#E0843E" stroke-width="3" stroke-linecap="round"/></g><circle cx="190" cy="65" r="3" fill="${INK}"/>
-  <rect x="10" y="98" width="360" height="22" rx="8" fill="url(#bk-steel)" stroke="${INK}" stroke-width="2.4"/>
-  <rect x="22" y="118" width="336" height="330" rx="22" fill="url(#bk-enamel)" stroke="${INK}" stroke-width="2.6"/>
-  <rect x="52" y="146" width="276" height="206" rx="16" fill="url(#bk-enamel2)" stroke="${INK}" stroke-width="2.2"/>
-  <rect x="82" y="186" width="216" height="128" rx="12" fill="#2C2440" stroke="${INK}" stroke-width="2.2"/>
-  <rect class="wx-glow" x="84" y="188" width="212" height="124" rx="11" fill="url(#bk-ovenglow)"/>
-  <path d="M96 282 H284" stroke="#6E5A7E" stroke-width="3"/>
-  <path d="M118 282 Q122 256 150 254 Q178 256 182 282 Z M200 282 Q204 262 232 260 Q262 262 264 282 Z" fill="#7A4A30" opacity=".6"/>
-  <path d="M98 300 L150 196 M130 300 L174 212" stroke="#fff" stroke-width="5" opacity=".12" stroke-linecap="round"/>
-  <g class="wx-heat"><path class="ln steam" stroke="#fff" stroke-width="3" opacity=".7" d="M140 132 Q132 120 140 108 M190 132 Q182 120 190 108 M240 132 Q232 120 240 108"/></g>
-  <rect x="70" y="158" width="240" height="13" rx="6.5" fill="url(#bk-brass)" stroke="${INK}" stroke-width="2"/>
-  <rect x="52" y="366" width="276" height="62" rx="12" fill="url(#bk-enamel2)" stroke="${INK}" stroke-width="2.2"/>
-  <rect x="160" y="390" width="60" height="10" rx="5" fill="url(#bk-brass)" stroke="${INK}" stroke-width="1.8"/>
-  <path d="M40 140 V420" stroke="#fff" stroke-width="6" opacity=".25" stroke-linecap="round"/>
-  ${[44, 318].map((x) => `<rect x="${x}" y="446" width="18" height="18" rx="4" fill="url(#bk-brass)" stroke="${INK}" stroke-width="2"/>`).join('')}
-  ${tag(300, -2, 'Tap to bake', 150)}`);
 
-const tableArt = () => svg(440, 260, `
-  <defs>
-    <linearGradient id="bk-marble" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E6E2EE"/></linearGradient>
-    <linearGradient id="bk-wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D6AC82"/><stop offset="1" stop-color="#AD8059"/></linearGradient>
-    <radialGradient id="bk-dough" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#FFF8E8"/><stop offset="1" stop-color="#E8D3AE"/></radialGradient>
-  </defs>
-  ${shadow(220, 252, 214, 10, 0.18)}
-  <path d="M30 40 H410 L436 96 H4 Z" fill="url(#bk-marble)" stroke="${INK}" stroke-width="2.4"/>
-  <path d="M70 52 Q120 70 150 60 T240 78 M300 50 Q330 64 380 58 M40 84 Q90 72 120 88" stroke="#CFC6DE" stroke-width="1.6" fill="none"/>
-  <rect x="4" y="96" width="432" height="16" rx="3" fill="#DCD6E6" stroke="${INK}" stroke-width="2.2"/>
-  <rect x="14" y="112" width="412" height="122" fill="url(#bk-wood)" stroke="${INK}" stroke-width="2.4"/>
-  ${[30, 226].map((x) => `<rect x="${x}" y="126" width="184" height="92" rx="6" fill="none" stroke="#8E6745" stroke-width="2.2"/><path d="M${x + 6} 214 V130 H${x + 178}" stroke="#E9C9A2" stroke-width="2" fill="none" opacity=".7"/>`).join('')}
-  <g stroke="#9E7450" stroke-width="1.2" opacity=".45" fill="none"><path d="M40 150 Q100 144 160 152 T220 148"/><path d="M240 170 Q300 162 360 172 T420 168"/><path d="M50 196 Q120 190 190 198"/></g>
-  ${[20, 404].map((x) => `<rect x="${x}" y="232" width="16" height="22" rx="4" fill="#8E6745" stroke="${INK}" stroke-width="2"/>`).join('')}
-  <ellipse cx="300" cy="84" rx="62" ry="10" fill="#fff" opacity=".8"/>
-  <ellipse cx="290" cy="72" rx="48" ry="22" fill="url(#bk-dough)" stroke="${INK}" stroke-width="2.2"/><path d="M262 64 Q280 54 300 56" stroke="#fff" stroke-width="3" opacity=".7" fill="none" stroke-linecap="round"/>
-  <g fill="#fff" opacity=".9"><circle cx="240" cy="84" r="2"/><circle cx="352" cy="80" r="1.6"/><circle cx="330" cy="90" r="2.2"/><circle cx="250" cy="76" r="1.4"/></g>
-  <path d="M370 82 l6 -12 6 12 -12 -7 h12 z" fill="none" stroke="#AEB8C8" stroke-width="2.4" stroke-linejoin="round"/>
-  <g transform="translate(390 46)"><path d="M-14 26 H14 L8 20 H-8 Z" fill="#E9E5F2" stroke="${INK}" stroke-width="1.6"/><rect x="-12" y="6" width="24" height="15" rx="3" fill="#CDBDF0" stroke="${INK}" stroke-width="1.6"/><path d="M-12 9 q4 5 8 0 q4 5 8 0 q4 5 8 0" fill="#E8DEFA" stroke="${INK}" stroke-width="1.2"/></g>
-  ${tag(220, 176, 'Decorate a cake 🎂', 210)}`);
+// ---------- windows & wall things ----------
+const windowBody = (it, sp, api) => {
+  const snow = api?.state.winterWeather !== 'clear';
+  const w = sp.len, h = 150;
+  return `<rect width="${w}" height="${h}" rx="6" fill="${snow ? '#B7C2DA' : '#BFE3FA'}" ${line}/>
+    ${snow ? '' : `<circle cx="${w * 0.76}" cy="36" r="16" fill="#FFF6D2"/><path d="M12 44 q12 -12 26 -4 q10 -10 24 0 q12 0 10 10 z" fill="#fff" opacity=".9"/>`}
+    <path d="M0 ${h * 0.68} Q${w * 0.3} ${h * 0.56} ${w * 0.6} ${h * 0.66} T${w} ${h * 0.6} V${h} H0 Z" fill="#fff"/>
+    ${pine(w * 0.24, h * 0.3, 0.3)}${pine(w * 0.72, h * 0.38, 0.24)}
+    ${snow ? Array.from({ length: 16 }, (_, i) => `<circle cx="${(6 + (i * 41) % (w - 12)).toFixed(1)}" cy="${8 + (i * 59) % (h - 30)}" r="${2 + (i % 3)}" fill="#fff"/>`).join('') : ''}
+    <path d="M${w / 2} 0 V${h} M0 ${h / 2} H${w}" stroke="${CREAM}" stroke-width="6"/>
+    <rect x="-6" y="${h - 4}" width="${w + 12}" height="12" rx="3" fill="${CREAM}" ${line}/>
+    <path d="M-12 -8 H${w + 12} V14 Q${w * 0.75} 30 ${w / 2} 14 Q${w * 0.25} 30 -12 14 Z" fill="#C9B8F2" ${line}/>
+    <path d="M-12 14 Q${w * 0.25} 30 ${w / 2} 14 Q${w * 0.75} 30 ${w + 12} 14" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round"/>`;
+};
+const breadShelf = (it, sp) => {
+  const L = sp.len;
+  const loaf = (x, y, c = '#D99A55') => `<path d="M${x - 18} ${y} Q${x - 20} ${y - 18} ${x} ${y - 20} Q${x + 20} ${y - 18} ${x + 18} ${y} Z" fill="${c}" ${line}/><path d="M${x - 8} ${y - 15} l4 8 M${x} ${y - 17} l4 8 M${x + 8} ${y - 15} l4 8" stroke="#F6DCA8" stroke-width="2.5" stroke-linecap="round"/>`;
+  const roll = (x, y) => `<ellipse cx="${x}" cy="${y - 7}" rx="10" ry="8" fill="#E2AE68" ${line}/><path d="M${x - 4} ${y - 12} q4 4 8 0" stroke="#F6DCA8" stroke-width="2" fill="none"/>`;
+  return `<rect y="46" width="${L}" height="9" rx="2" fill="${WOOD}" ${line}/><rect y="100" width="${L}" height="9" rx="2" fill="${WOOD}" ${line}/>
+    ${loaf(24, 46)}${loaf(64, 46, '#C98A48')}${loaf(104, 46)}
+    <path d="M${L - 34} 46 L${L - 22} 6 M${L - 26} 46 L${L - 8} 10" stroke="#3E3252" stroke-opacity=".5" stroke-width="9" stroke-linecap="round"/><path d="M${L - 34} 46 L${L - 22} 6 M${L - 26} 46 L${L - 8} 10" stroke="#E2AE68" stroke-width="6" stroke-linecap="round"/>
+    ${roll(18, 100)}${roll(40, 100)}${roll(62, 100)}${roll(29, 88)}${roll(51, 88)}
+    <rect x="${L - 60}" y="72" width="44" height="28" rx="5" fill="#E6C08A" ${line}/><path d="M${L - 58} 82 H${L - 18} M${L - 58} 91 H${L - 18}" stroke="#B98A55" stroke-width="1.6"/>`;
+};
+const menuBoard = (it, sp) => {
+  const L = sp.len;
+  return `<rect width="${L}" height="120" rx="6" fill="#3E4A52" stroke="${WOOD}" stroke-width="7"/>
+    ${text(L / 2, 30, 'Snowflake', 17, '#FBF7EF')}${text(L / 2, 50, 'Bakery', 17, SUN)}
+    ${flake(18, 22, 7, '#9EDDD4', 2)}${flake(L - 18, 22, 7, '#9EDDD4', 2)}
+    <g font-family="Fredoka, sans-serif" font-size="11" fill="#E6EEF2">${[['Bread', '🍞'], ['Pie', '🥧'], ['Cookies', '🍪'], ['Cake', '🎂']].map(([t], i) => `<text x="16" y="${70 + i * 13}">${t}</text><text x="${L - 16}" y="${70 + i * 13}" text-anchor="end">★</text><path d="M${16 + t.length * 6} ${66 + i * 13} H${L - 28}" stroke="#E6EEF2" stroke-width="1" stroke-dasharray="1 3"/>`).join('')}</g>`;
+};
+const jarShelf = (it, sp) => {
+  const L = sp.len;
+  return `<rect y="74" width="${L}" height="9" rx="2" fill="${WOOD}" ${line}/><path d="M16 83 L16 98 L30 83 M${L - 16} 83 L${L - 16} 98 L${L - 30} 83" fill="none" stroke="${WOOD_D}" stroke-width="3"/>
+    ${[[10, 'FLOUR', CREAM], [44, 'SUGAR', '#FFFFFF'], [78, '', '#C9B8F2']].map(([x, l, c]) => `<rect x="${x}" y="30" width="28" height="44" rx="6" fill="#EAF3F9" ${line}/><rect x="${x + 3}" y="46" width="22" height="25" rx="4" fill="${c}"/>
+      ${c === '#C9B8F2' ? `<g fill="#9EDDD4">${[0, 1, 2].map((k) => `<circle cx="${x + 8 + k * 6}" cy="${56 + (k % 2) * 6}" r="2.6"/>`).join('')}</g>` : ''}<rect x="${x - 1}" y="24" width="30" height="8" rx="3" fill="#C99772" ${line}/>
+      ${l ? `<text x="${x + 14}" y="44" text-anchor="middle" font-family="Fredoka, sans-serif" font-size="6.5" fill="#7A64B0">${l}</text>` : ''}`).join('')}
+    <g transform="translate(${L - 34} 74)"><path d="M-14 0 H14 L8 -6 H-8 Z" fill="#E7E2EF" ${line}/><path d="M-10 -6 Q0 -46 10 -6 Z" fill="#E8F2F8" fill-opacity=".8" ${line}/><circle cx="0" cy="-30" r="3" fill="#C99772"/></g>`;
+};
+const clockBody = (it, sp) => {
+  const L = sp.len, c = L / 2;
+  return `<defs><linearGradient id="bk-clockwood" x1="0" x2="1"><stop offset="0" stop-color="#9E7450"/><stop offset=".4" stop-color="#C99772"/><stop offset="1" stop-color="#8E6745"/></linearGradient></defs>
+    <path d="M4 40 Q4 2 ${c} 2 Q${L - 4} 2 ${L - 4} 40 V146 Q${L - 4} 150 ${L - 8} 150 H8 Q4 150 4 146 Z" fill="url(#bk-clockwood)" ${line}/>
+    <circle cx="${c}" cy="36" r="${c - 9}" fill="${CREAM}" ${line}/>
+    <g fill="#7A64B0">${Array.from({ length: 12 }, (_, i) => { const a = (i / 12) * Math.PI * 2; return `<circle cx="${(c + Math.cos(a) * (c - 14)).toFixed(1)}" cy="${(36 + Math.sin(a) * (c - 14)).toFixed(1)}" r="${i % 3 ? 1 : 1.8}"/>`; }).join('')}</g>
+    <path d="M${c} 36 V24 M${c} 36 L${c + 8} 40" stroke="#3E3252" stroke-width="2.2" stroke-linecap="round"/>
+    <rect x="${c - 13}" y="68" width="26" height="72" rx="6" fill="#3A3150" ${line}/>
+    <g class="wx-pendulum"><path d="M${c} 70 V124" stroke="#D9B36A" stroke-width="2.5"/><circle cx="${c}" cy="127" r="7" fill="#E9C77E" ${line}/></g>`;
+};
 
-const sackArt = (it) => svg(it.w, it.h, `<g transform="scale(${it.w / 150})">
-  <defs><linearGradient id="bk-burlap" x1="0" x2="1"><stop offset="0" stop-color="#D2BE98"/><stop offset=".35" stop-color="#F1E5CC"/><stop offset="1" stop-color="#C8B38C"/></linearGradient>
-    <pattern id="bk-weave" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M0 3 H6 M3 0 V6" stroke="#B9A47E" stroke-width=".8" opacity=".55"/></pattern></defs>
-  ${shadow(75, 162, 66, 8, 0.18)}
-  <path ${O2} d="M22 52 Q10 100 14 140 Q16 162 40 164 H110 Q134 162 136 140 Q140 100 128 52 Z" fill="url(#bk-burlap)"/>
-  <path d="M22 52 Q10 100 14 140 Q16 162 40 164 H110 Q134 162 136 140 Q140 100 128 52 Z" fill="url(#bk-weave)"/>
-  <path ${O2} d="M30 54 Q38 30 50 34 Q60 18 75 26 Q92 16 102 34 Q116 30 120 54 Q75 64 30 54 Z" fill="#E8DABD"/>
-  <path d="M44 50 Q75 58 106 50" stroke="#8B6450" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M98 52 q10 6 4 16 M98 52 q-2 12 -10 14" stroke="#8B6450" stroke-width="3" fill="none" stroke-linecap="round"/>
-  <rect x="40" y="84" width="70" height="46" rx="8" fill="#FBF7EF" fill-opacity=".85" stroke="#7FA9C9" stroke-width="2"/>
-  ${text(75, 114, 'FLOUR', 17, '#5E86AE', 600)}<path d="M75 92 V102 M70 95 l5 4 5 -4" stroke="#C9A35A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-  <path d="M26 70 Q22 110 26 146" stroke="#fff" stroke-width="5" opacity=".3" fill="none" stroke-linecap="round"/>
-  <ellipse cx="120" cy="164" rx="22" ry="5" fill="#fff" opacity=".8"/></g>`);
+// ---------- the oven (fixed, bakes in turns) ----------
+const oven = () => {
+  const body = shades('#B7A8DE'), steel = shades('#D6DCE6'), copper = shades('#E7B08A'), brass = shades('#E2C27A');
+  const D = 1.9 * 64;
+  const face = `<defs><radialGradient id="bk-ovenglow" cx=".5" cy=".7" r=".7"><stop offset="0" stop-color="#FFD98A"/><stop offset=".55" stop-color="#F3A35A"/><stop offset="1" stop-color="#C8643A" stop-opacity=".25"/></radialGradient></defs>
+    <rect x="6" y="5" width="${D - 12}" height="30" rx="8" fill="#CFC2EC" ${line}/>
+    ${[22, D - 22].map((x) => `<circle cx="${x}" cy="20" r="8" fill="#E9C77E" ${line}/><path d="M${x} 14 V19" stroke="#3E3252" stroke-width="2" stroke-linecap="round"/>`).join('')}
+    <circle cx="${D / 2}" cy="20" r="13" fill="${CREAM}" ${line}/><g class="wx-dial"><circle cx="${D / 2}" cy="20" r="12" fill="none"/><path d="M${D / 2} 20 V10" stroke="#E0843E" stroke-width="2.6" stroke-linecap="round"/></g>
+    <rect x="8" y="42" width="${D - 16}" height="100" rx="10" fill="#C4B6E6" ${line}/>
+    <rect x="22" y="48" width="${D - 44}" height="7" rx="3.5" fill="#E9C77E" ${line}/>
+    <rect x="20" y="62" width="${D - 40}" height="62" rx="8" fill="#2C2440" ${line}/>
+    <rect class="wx-glow" x="22" y="64" width="${D - 44}" height="58" rx="7" fill="url(#bk-ovenglow)"/>
+    <path d="M28 110 H${D - 28}" stroke="#6E5A7E" stroke-width="2"/><path d="M38 110 Q40 96 52 95 Q64 96 66 110 Z M72 110 Q74 98 86 97 Q98 98 98 110 Z" fill="#7A4A30" opacity=".6"/>
+    <g class="wx-heat"><path class="ln steam" stroke="#fff" stroke-width="2.5" opacity=".8" d="M40 92 Q35 84 40 76 M${D / 2} 92 Q${D / 2 - 5} 84 ${D / 2} 76 M${D - 40} 92 Q${D - 45} 84 ${D - 40} 76"/></g>
+    <path d="M28 120 L50 66 M44 120 L62 76" stroke="#fff" stroke-width="4" opacity=".12" stroke-linecap="round"/>
+    <rect x="${D / 2 - 18}" y="130" width="36" height="6" rx="3" fill="#E9C77E" ${line}/>`;
+  return isoItem(1.3, 2.0, 282, [
+    ...[[0.1, 0.12], [1.05, 0.12], [0.1, 1.75], [1.05, 1.75]].map(([u, v]) => ({ u, v, w: 0.14, d: 0.14, h: 10, ...brass })),
+    { u: 0.05, v: 0.05, w: 1.2, d: 1.9, z: 10, h: 150, ...body, rightDecor: face,
+      leftDecor: `<rect x="8" y="10" width="${1.2 * 64 - 16}" height="130" rx="8" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="3"/>${flake(1.2 * 32, 76, 14, '#fff', 3)}` },
+    { u: 0, v: 0, w: 1.3, d: 2.0, z: 160, h: 8, ...steel },
+    { u: 0.12, v: 0.82, w: 0.34, d: 0.34, z: 168, h: 114, ...copper, rightDecor: '<path d="M0 30 H22 M0 78 H22" stroke="#B9774E" stroke-width="4"/>' },
+    P(0.75, 1.45, 168, (x, y) => `<path d="M${x - 20} ${y - 2} V${y - 26} H${x + 20} V${y - 2} Q${x} ${y + 7} ${x - 20} ${y - 2} Z" fill="#E58F6A" ${line}/><ellipse cx="${x}" cy="${y - 26}" rx="20" ry="7" fill="#F0A584" ${line}/><path d="M${x - 20} ${y - 18} h-7 M${x + 20} ${y - 18} h7" stroke="#3E3252" stroke-opacity=".6" stroke-width="3.5" stroke-linecap="round"/>`, 0.3, 0.3),
+    P(0.7, 0.5, 168, (x, y) => `<path d="M${x - 30} ${y - 4} L${x + 2} ${y - 20} L${x + 34} ${y - 4} L${x + 2} ${y + 12} Z" fill="#AEB8C8" ${line}/>${[[-12, -4], [2, -10], [16, -4], [2, 2]].map(([dx, dy]) => `<ellipse cx="${x + dx}" cy="${y + dy - 4}" rx="7" ry="5" fill="#E2AE68" ${line}/>`).join('')}`, 0.4, 0.4),
+  ]);
+};
+const counter = () => {
+  const cab = shades('#EADBC5'), top = shades('#F2EEF6');
+  const D = 2.34 * 64;
+  return isoItem(1.1, 2.4, 92, [
+    { u: 0.03, v: 0.03, w: 1.04, d: 2.34, h: 82, ...cab,
+      rightDecor: [0, 1, 2].map((k) => `<rect x="${6 + k * D / 3}" y="10" width="${D / 3 - 12}" height="64" rx="5" fill="#A9E2D8" ${line}/><circle cx="${D / 3 * (k + 0.5)}" cy="24" r="3" fill="${WOOD_D}"/>`).join('') },
+    { u: 0, v: 0, w: 1.1, d: 2.4, z: 82, h: 10, ...top, topDecor: '<path d="M.2 .3 Q.5 .6 .4 1.1 T.7 2 M.8 .2 Q.6 .8 .9 1.4" stroke="#D8D0E4" stroke-width=".03" fill="none"/>' },
+  ]);
+};
+const island = () => {
+  const cab = shades('#9CC8EE', 0.8), top = shades('#F7F5FA');
+  const W2 = 2.24 * 64, D2 = 1.14 * 64;
+  return isoItem(2.4, 1.3, 96, [
+    { u: 0.08, v: 0.08, w: 2.24, d: 1.14, h: 74, ...cab,
+      leftDecor: [0, 1, 2].map((k) => `<rect x="${6 + k * W2 / 3}" y="8" width="${W2 / 3 - 12}" height="24" rx="4" fill="none" ${line}/><rect x="${W2 / 6 * (2 * k + 1) - 8}" y="18" width="16" height="4" rx="2" fill="${WOOD_D}"/>
+        <rect x="${6 + k * W2 / 3}" y="38" width="${W2 / 3 - 12}" height="28" rx="4" fill="none" ${line}/>`).join(''),
+      rightDecor: `<rect x="8" y="8" width="${D2 - 16}" height="58" rx="5" fill="none" ${line}/>${flake(D2 / 2, 37, 12, '#fff', 3)}` },
+    { u: 0, v: 0, w: 2.4, d: 1.3, z: 74, h: 12, ...top,
+      topDecor: '<path d="M.2 .3 Q.7 .5 1 .35 T2 .5 M.3 1 Q.9 .9 1.4 1.1" stroke="#D8D0E4" stroke-width=".025" fill="none"/><g fill="#fff">' + [[0.4, 0.75, 0.05], [0.7, 1.05, 0.04], [0.25, 1.05, 0.03], [0.85, 0.7, 0.03]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}"/>`).join('') + '</g><ellipse cx=".5" cy=".95" rx=".32" ry=".2" fill="#fff" opacity=".8"/>' },
+    P(0.5, 0.92, 86, (x, y) => `<defs><radialGradient id="bk-dough" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#FFF8E8"/><stop offset="1" stop-color="#E8D3AE"/></radialGradient></defs>
+      <ellipse cx="${x}" cy="${y - 8}" rx="26" ry="14" fill="url(#bk-dough)" ${line}/><path d="M${x - 14} ${y - 14} Q${x - 4} ${y - 20} ${x + 8} ${y - 18}" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>`, 0.2, 0.2),
+  ]);
+};
+const caseArt = () => {
+  const wood = shades('#D6AC82'), W2 = 3.2 * 64;
+  const croissant = (x, y) => `<path d="M${x - 14} ${y} Q${x - 15} ${y - 8} ${x - 7} ${y - 10} Q${x - 3} ${y - 17} ${x + 4} ${y - 15} Q${x + 12} ${y - 14} ${x + 14} ${y} Q${x} ${y - 4} ${x - 14} ${y} Z" fill="#F0C27A" ${line}/>`;
+  const mac = (x, y, c) => `<ellipse cx="${x}" cy="${y - 3}" rx="9" ry="5" fill="${c}" ${line}/><rect x="${x - 8}" y="${y - 7}" width="16" height="3" fill="${CREAM}"/><ellipse cx="${x}" cy="${y - 8}" rx="9" ry="5" fill="${c}" ${line}/>`;
+  const roll = (x, y) => `<ellipse cx="${x}" cy="${y - 5}" rx="12" ry="7" fill="#D79F5E" ${line}/><path d="M${x} ${y - 5} m-2 0 a2 1.5 0 1 1 4 0 a5 3.5 0 1 1 -10 0 a8 5.5 0 1 1 16 0" fill="none" stroke="#9A5E33" stroke-width="1.6"/>`;
+  const donut = (x, y) => `<ellipse cx="${x}" cy="${y - 5}" rx="12" ry="7" fill="#E2B272" ${line}/><ellipse cx="${x}" cy="${y - 7}" rx="9" ry="5" fill="#CDBDF0"/><ellipse cx="${x}" cy="${y - 7}" rx="3" ry="2" fill="${CREAM}" ${line}/>`;
+  return isoItem(3.2, 1.0, 120, [
+    { u: 0, v: 0, w: 3.2, d: 1.0, h: 58, ...wood,
+      leftDecor: [0, 1, 2, 3].map((k) => `<rect x="${6 + k * W2 / 4}" y="10" width="${W2 / 4 - 12}" height="38" rx="5" fill="none" ${line}/>`).join(''),
+      rightDecor: `<rect x="6" y="10" width="${64 - 12}" height="38" rx="5" fill="none" ${line}/>` },
+    { u: 0.04, v: 0.04, w: 3.12, d: 0.92, z: 58, h: 2, top: '#FBF5E8', left: '#EFE3CB', right: '#E5D6BA' },
+    P(1.6, 0.5, 60, () => {
+      let s = '';
+      for (let i = 0; i < 6; i++) { const [x, y] = at(0.35 + i * 0.5, 0.3, 60); s += croissant(x, y); }
+      for (let i = 0; i < 9; i++) { const [x, y] = at(0.3 + i * 0.32, 0.55, 60); s += mac(x, y, ['#CDBDF0', '#A9E2D8', '#F6E39A', '#BFDDF6'][i % 4]); }
+      for (let i = 0; i < 6; i++) { const [x, y] = at(0.35 + i * 0.5, 0.8, 60); s += i % 2 ? donut(x, y) : roll(x, y); }
+      return s;
+    }, 1, 1),
+    P(3, 1, 0, () => {
+      const g = (u, v, z) => at(u, v, z);
+      const top = [g(0.04, 0.04, 104), g(3.16, 0.04, 104), g(3.16, 0.96, 104), g(0.04, 0.96, 104)];
+      const front = [g(0.04, 0.96, 58), g(3.16, 0.96, 58), g(3.16, 0.96, 104), g(0.04, 0.96, 104)];
+      const side = [g(3.16, 0.96, 58), g(3.16, 0.04, 58), g(3.16, 0.04, 104), g(3.16, 0.96, 104)];
+      const [a1, a2] = [g(0.5, 0.96, 62), g(0.9, 0.96, 100)], [b1, b2] = [g(2.2, 0.96, 62), g(2.6, 0.96, 100)];
+      return `<polygon points="${pp(front)}" fill="#E4F1F9" fill-opacity=".28" ${line}/><polygon points="${pp(side)}" fill="#CFE3F0" fill-opacity=".35" ${line}/>
+        <polygon points="${pp(top)}" fill="#E8F4FB" fill-opacity=".35" ${line}/>
+        <path d="M${a1[0]} ${a1[1]} L${a2[0]} ${a2[1]} M${b1[0]} ${b1[1]} L${b2[0]} ${b2[1]}" stroke="#fff" stroke-width="6" opacity=".45" stroke-linecap="round"/>
+        <polyline points="${pp([g(0, 1, 104), g(3.2, 1, 104), g(3.2, 0, 104)])}" fill="none" stroke="#C9A35A" stroke-width="4" stroke-linejoin="round"/>`;
+    }, 1, 1),
+  ]);
+};
+const bench = () => {
+  const wood = shades('#EADBC5'), cush = shades(TEAL);
+  return isoItem(2.0, 0.7, 70, [
+    { u: 0, v: 0, w: 2.0, d: 0.7, h: 38, ...wood, leftDecor: [0, 1].map((k) => `<rect x="${6 + k * 64}" y="8" width="52" height="22" rx="4" fill="none" ${line}/>`).join('') },
+    { u: 0.04, v: 0.04, w: 1.92, d: 0.62, z: 38, h: 10, ...cush, leftDecor: '<path d="M4 4 H118" stroke="#fff" stroke-opacity=".5" stroke-width="2" stroke-dasharray="4 4"/>' },
+    P(1.5, 0.2, 48, (x, y) => `<path d="M${x - 22} ${y + 4} Q${x - 26} ${y - 24} ${x} ${y - 28} Q${x + 26} ${y - 24} ${x + 22} ${y + 4} Q${x} ${y + 12} ${x - 22} ${y + 4} Z" fill="${SUN}" ${line}/>${flake(x, y - 10, 7, '#fff', 2)}`, 0.3, 0.3),
+  ]);
+};
+const proofRack = () => {
+  const post = shades('#AEB8C8'), shelf = shades('#D6DCE6');
+  const levels = [12, 62, 112, 162];
+  return isoItem(1.2, 0.6, 214, [
+    ...[[0, 0], [1.12, 0], [0, 0.52], [1.12, 0.52]].map(([u, v]) => ({ u, v, w: 0.08, d: 0.08, h: 210, ...post })),
+    ...levels.map((z) => ({ u: 0.02, v: 0.02, w: 1.16, d: 0.56, z, h: 5, ...shelf })),
+    { u: 0, v: 0, w: 1.2, d: 0.6, z: 206, h: 6, ...post },
+  ], () => levels.map((z, k) => [0.25, 0.6, 0.95].map((u, i) => {
+    const [x, y] = at(u, 0.3, z + 5);
+    return k % 2 ? `<ellipse cx="${x}" cy="${y - 6}" rx="14" ry="8" fill="${['#E2AE68', '#D99A55', '#E9B970'][i]}" ${line}/><path d="M${x - 6} ${y - 9} l4 5 M${x + 1} ${y - 11} l4 5" stroke="#F6DCA8" stroke-width="2" stroke-linecap="round"/>`
+      : `<path d="M${x - 16} ${y - 2} Q${x - 18} ${y - 18} ${x} ${y - 19} Q${x + 18} ${y - 18} ${x + 16} ${y - 2} Z" fill="${['#C98A48', '#E2AE68', '#D99A55'][i]}" ${line}/>`;
+  }).join('')).join(''));
+};
+const cooler = () => {
+  const c = shades('#EDE6F7'), W2 = 1.3 * 64;
+  const cake = (x, y, col) => `<path d="M${x - 14} ${y} V${y - 14} H${x + 14} V${y} Z" fill="${col}" ${line}/><ellipse cx="${x}" cy="${y - 14}" rx="14" ry="4" fill="${lighter(col, 0.4)}" ${line}/><circle cx="${x}" cy="${y - 20}" r="3" fill="#6A4C93"/>`;
+  return isoItem(1.3, 0.8, 214, [
+    { u: 0, v: 0, w: 1.3, d: 0.8, h: 206, ...c,
+      leftDecor: `<rect x="7" y="10" width="${W2 - 14}" height="150" rx="6" fill="#DDF0F6" ${line}/><rect x="7" y="10" width="${W2 - 14}" height="150" rx="6" fill="#FFF8DA" opacity=".35"/>
+        ${[58, 106, 154].map((y) => `<path d="M9 ${y} H${W2 - 9}" stroke="#AEB8C8" stroke-width="3"/>`).join('')}
+        ${cake(26, 58, '#CDBDF0')}${cake(58, 58, '#A9E2D8')}${cake(26, 106, '#F6E39A')}${cake(58, 106, '#BFDDF6')}${cake(42, 154, '#CDBDF0')}
+        <path d="M14 18 L26 150" stroke="#fff" stroke-width="5" opacity=".4" stroke-linecap="round"/><rect x="${W2 - 18}" y="70" width="5" height="34" rx="2" fill="#AEB8C8"/>
+        <rect x="7" y="168" width="${W2 - 14}" height="30" rx="5" fill="none" ${line}/>` },
+    { u: -0.02, v: -0.02, w: 1.34, d: 0.84, z: 206, h: 8, ...shades('#D9CFEA') },
+  ]);
+};
+const cafeTable = () => isoItem(0.9, 0.9, 74, [
+  { u: 0.3, v: 0.3, w: 0.3, d: 0.3, h: 6, round: true, ...shades(WOOD_D) },
+  { u: 0.41, v: 0.41, w: 0.08, d: 0.08, z: 6, h: 60, ...shades(WOOD_D) },
+  { u: 0, v: 0, w: 0.9, d: 0.9, z: 64, h: 8, round: true, ...shades('#F2EEF6') },
+]);
+const stool = (col) => () => isoItem(0.55, 0.55, 58, [
+  ...[[0.08, 0.08], [0.39, 0.08], [0.08, 0.39], [0.39, 0.39]].map(([u, v]) => ({ u, v, w: 0.07, d: 0.07, h: 44, ...shades(WOOD_D) })),
+  { u: 0, v: 0, w: 0.55, d: 0.55, z: 44, h: 10, round: true, ...shades(col) },
+]);
+const rugArt = () => isoItem(2.0, 2.0, 4, [
+  { u: 0, v: 0, w: 2.0, d: 2.0, h: 0, round: true, top: '#C9B8F2',
+    topDecor: `<circle cx="1" cy="1" r=".78" fill="none" stroke="#fff" stroke-width=".05" stroke-dasharray=".14 .1"/><circle cx="1" cy="1" r=".5" fill="#B79CF0"/>` },
+]);
+const sackArt = (s) => () => isoItem(s, s, 130 * s, [P(s / 2, s / 2, 0, (x, y) => `<g transform="translate(${x} ${y}) scale(${s / 0.9})">
+    <ellipse cx="4" cy="2" rx="54" ry="14" fill="#3E3252" opacity=".12"/>
+    <path d="M-48 -6 Q-58 -60 -40 -96 Q0 -86 40 -96 Q58 -60 48 -6 Q0 10 -48 -6 Z" fill="#E9DCC0" ${line}/>
+    <path d="M-40 -14 Q-48 -56 -34 -88" stroke="#fff" stroke-opacity=".45" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M-44 -30 Q0 -20 44 -30 M-46 -56 Q0 -46 46 -56 M-20 -90 Q-24 -40 -18 -2 M18 -90 Q22 -40 18 -2" stroke="#C8B38C" stroke-width="1.2" fill="none" opacity=".7"/>
+    <path d="M-34 -94 Q-30 -118 -16 -110 Q0 -126 16 -110 Q30 -118 34 -94 Q0 -84 -34 -94 Z" fill="#F1E5CC" ${line}/>
+    <path d="M-26 -96 Q0 -90 26 -96" stroke="${WOOD_D}" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <rect x="-27" y="-70" width="54" height="34" rx="6" fill="${CREAM}" stroke="#7FA9C9" stroke-width="2"/>
+    <text x="0" y="-48" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="600" font-size="13" fill="#5E86AE">FLOUR</text>
+    <ellipse cx="44" cy="4" rx="18" ry="5" fill="#fff" opacity=".85"/></g>`, s, s)]);
 
+// ---------- small things (sit on the counter, island, bench or case) ----------
+const sprite = (fw, fd, h, fn) => () => isoItem(fw, fd, h, [P(fw / 2, fd / 2, 0, fn, fw, fd)]);
+const catArt = sprite(0.7, 0.4, 60, (x, y) => `<g transform="translate(${x - 41} ${y - 46}) scale(.85)"><defs><radialGradient id="bk-cat" cx=".45" cy=".35" r=".7"><stop offset="0" stop-color="#C9C3DD"/><stop offset="1" stop-color="#948DB0"/></radialGradient></defs>
+  ${shadow(48, 52, 42, 4)}<path class="tail" d="M78 44 Q96 40 90 24" stroke="${INK}" stroke-width="9" fill="none" stroke-linecap="round"/><path class="tail" d="M78 44 Q96 40 90 24" stroke="#A9A3C4" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <ellipse cx="52" cy="38" rx="34" ry="16" fill="url(#bk-cat)" stroke="${INK}" stroke-width="2"/>
+  <path d="M44 24 Q48 34 44 44 M56 23 Q60 34 57 46 M68 26 Q71 36 69 46" stroke="#857EA3" stroke-width="2" fill="none" opacity=".6"/>
+  <circle cx="24" cy="36" r="14" fill="url(#bk-cat)" stroke="${INK}" stroke-width="2"/><path d="M14 28 L12 16 L22 24 M30 23 L36 14 L36 27" fill="#A9A3C4" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M17 36 q3 2 6 0 M26 36 q3 2 6 0" stroke="${INK}" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M22 41 l2 1.4 2 -1.4" stroke="${INK}" stroke-width="1.2" fill="none"/>
+  <ellipse cx="34" cy="48" rx="9" ry="4" fill="#DAD5EA" stroke="${INK}" stroke-width="1.5"/></g>`);
+const herbsArt = sprite(0.35, 0.35, 70, (x, y) => `<g transform="translate(${x - 26} ${y - 60}) scale(.8)">
+  <g stroke="#5E9C7E" stroke-width="2.2" stroke-linecap="round" fill="none"><path d="M32 46 Q26 26 18 8"/><path d="M32 46 Q34 22 32 2"/><path d="M32 46 Q40 26 48 10"/></g>
+  <g fill="#86C2A2">${[[20, 12], [24, 22], [28, 32], [32, 6], [33, 18], [33, 30], [46, 14], [42, 24], [38, 34]].map(([a, b], i) => `<ellipse cx="${a}" cy="${b}" rx="3.2" ry="6" transform="rotate(${i % 2 ? 30 : -30} ${a} ${b})"/>`).join('')}</g>
+  <path d="M12 44 H52 L46 74 H18 Z" fill="#7FC4BC" stroke="${INK}" stroke-width="2"/><rect x="9" y="40" width="46" height="9" rx="3" fill="#A9E2D8" stroke="${INK}" stroke-width="2"/><path d="M20 52 V70" stroke="#fff" stroke-width="3" opacity=".35"/></g>`);
+const jarArt = sprite(0.35, 0.35, 76, (x, y) => `<g transform="translate(${x - 26} ${y - 69}) scale(.65)"><defs><linearGradient id="bk-glass" x1="0" x2="1"><stop offset="0" stop-color="#CFE3F0" stop-opacity=".85"/><stop offset=".3" stop-color="#FFFFFF" stop-opacity=".7"/><stop offset="1" stop-color="#BBD3E4" stop-opacity=".85"/></linearGradient></defs>
+  ${shadow(40, 106, 34, 4)}<path d="M10 34 Q8 30 14 28 H66 Q72 30 70 34 V96 Q70 106 60 106 H20 Q10 106 10 96 Z" fill="url(#bk-glass)" stroke="${INK}" stroke-width="2"/>
+  ${[[26, 92], [50, 94], [38, 76], [22, 62], [56, 70], [40, 52]].map(([a, b]) => `<circle cx="${a}" cy="${b}" r="11" fill="#D9A86C" stroke="#A8743E" stroke-width="1.4"/><circle cx="${a - 3}" cy="${b - 2}" r="1.8" fill="#7A4A30"/><circle cx="${a + 4}" cy="${b + 3}" r="1.6" fill="#7A4A30"/>`).join('')}
+  <path d="M18 40 V96" stroke="#fff" stroke-width="4" opacity=".55" stroke-linecap="round"/>
+  <rect x="8" y="16" width="64" height="16" rx="6" fill="#C99772" stroke="${INK}" stroke-width="2"/><ellipse cx="40" cy="14" rx="12" ry="6" fill="#A87A5A" stroke="${INK}" stroke-width="2"/></g>`);
+const mixerArt = sprite(0.45, 0.45, 92, (x, y) => `<g transform="translate(${x - 36} ${y - 82}) scale(.6)"><defs><linearGradient id="bk-mix" x1="0" x2="1"><stop offset="0" stop-color="#5FA7A0"/><stop offset=".35" stop-color="#A9E2D8"/><stop offset="1" stop-color="#4E968F"/></linearGradient>
+    <linearGradient id="bk-steel" x1="0" x2="1"><stop offset="0" stop-color="#AEB8C8"/><stop offset=".35" stop-color="#F2F5F9"/><stop offset="1" stop-color="#A3AEBF"/></linearGradient></defs>
+  ${shadow(60, 136, 50, 5)}<g class="steam-big"><path class="ln" stroke="#fff" stroke-width="3" d="M44 70 q-6 -8 0 -16 M76 70 q-6 -8 0 -16"/></g>
+  <rect x="14" y="118" width="92" height="18" rx="7" fill="url(#bk-mix)" stroke="${INK}" stroke-width="2"/>
+  <path d="M80 120 V50 Q80 30 64 26 H40 Q16 26 14 46 Q14 62 34 64 H66 V120 Z" fill="url(#bk-mix)" stroke="${INK}" stroke-width="2"/>
+  <path d="M44 64 V82" stroke="#AEB8C8" stroke-width="4"/>
+  <path d="M22 82 H74 Q72 116 48 118 Q24 116 22 82 Z" fill="url(#bk-steel)" stroke="${INK}" stroke-width="2"/><ellipse cx="48" cy="82" rx="26" ry="5" fill="#FFF5DD" stroke="${INK}" stroke-width="1.6"/>
+  <path d="M24 34 Q34 30 50 30" stroke="#fff" stroke-width="3" opacity=".5" fill="none" stroke-linecap="round"/><circle cx="72" cy="44" r="4" fill="#E9C77E" stroke="${INK}" stroke-width="1.4"/></g>`);
+const pinArt = sprite(0.6, 0.2, 30, (x, y) => `<g transform="translate(${x} ${y}) rotate(26.6) scale(.55) translate(-75 -30)"><defs><linearGradient id="bk-pin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F0D2A8"/><stop offset=".45" stop-color="#E2B888"/><stop offset="1" stop-color="#B8885E"/></linearGradient></defs>
+  ${shadow(75, 36, 62, 4)}<rect x="4" y="15" width="26" height="10" rx="5" fill="#C99772" stroke="${INK}" stroke-width="2"/><rect x="120" y="15" width="26" height="10" rx="5" fill="#C99772" stroke="${INK}" stroke-width="2"/>
+  <rect x="28" y="6" width="94" height="28" rx="12" fill="url(#bk-pin)" stroke="${INK}" stroke-width="2"/><path d="M36 13 H112" stroke="#fff" stroke-width="3" opacity=".5" stroke-linecap="round"/></g>`);
+const basketArt = sprite(0.7, 0.5, 52, (x, y) => `<g transform="translate(${x - 41} ${y - 44}) scale(.55)"><defs><linearGradient id="bk-wicker" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E6C08A"/><stop offset="1" stop-color="#B98A55"/></linearGradient></defs>
+  <g transform="rotate(-14 60 30)"><rect x="20" y="4" width="96" height="20" rx="10" fill="#E2AE68" stroke="${INK}" stroke-width="2"/><path d="M40 8 l6 12 M60 8 l6 12 M80 8 l6 12" stroke="#F6DCA8" stroke-width="3" stroke-linecap="round"/></g>
+  <g transform="rotate(10 90 30)"><rect x="40" y="10" width="96" height="18" rx="9" fill="#D99D58" stroke="${INK}" stroke-width="2"/><path d="M62 13 l6 11 M84 13 l6 11 M106 13 l6 11" stroke="#F6DCA8" stroke-width="3" stroke-linecap="round"/></g>
+  <path d="M8 34 H142 L130 80 H20 Z" fill="url(#bk-wicker)" stroke="${INK}" stroke-width="2"/>
+  <g stroke="#9E7046" stroke-width="1.6" opacity=".7" fill="none">${[46, 58, 70].map((b) => `<path d="M${10 + (b - 34) * 0.25} ${b} H${140 - (b - 34) * 0.25}"/>`).join('')}${Array.from({ length: 9 }, (_, i) => `<path d="M${22 + i * 14} 36 V78"/>`).join('')}</g>
+  <rect x="2" y="30" width="146" height="8" rx="3" fill="#C99772" stroke="${INK}" stroke-width="2"/></g>`);
+const bellArt = sprite(0.3, 0.3, 40, (x, y) => `<g transform="translate(${x - 21} ${y - 35}) scale(.6)"><defs><linearGradient id="bk-brass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6DEA2"/><stop offset="1" stop-color="#C39A52"/></linearGradient></defs>
+  ${shadow(35, 58, 30, 4)}<rect x="4" y="46" width="62" height="12" rx="4" fill="#C99772" stroke="${INK}" stroke-width="2"/>
+  <path d="M10 46 Q10 14 35 14 Q60 14 60 46 Z" fill="url(#bk-brass)" stroke="${INK}" stroke-width="2"/><path d="M30 6 h10 v8 h-10 z" fill="#C39A52" stroke="${INK}" stroke-width="1.8"/>
+  <path d="M18 38 Q18 22 32 20" stroke="#fff" stroke-width="3" opacity=".6" fill="none" stroke-linecap="round"/></g>`);
+const vaseArt = sprite(0.25, 0.25, 50, (x, y) => `<path d="M${x - 7} ${y} Q${x - 10} ${y - 14} ${x - 4} ${y - 20} H${x + 4} Q${x + 10} ${y - 14} ${x + 7} ${y} Z" fill="${SKY}" ${line}/>
+  <path d="M${x} ${y - 20} V${y - 38} M${x} ${y - 26} L${x - 8} ${y - 36}" stroke="#5E9C7E" stroke-width="2"/><circle cx="${x}" cy="${y - 40}" r="5" fill="${SUN}" ${line}/><circle cx="${x - 9}" cy="${y - 37}" r="4" fill="${LILAC}" ${line}/>`);
+
+const eggCrate = () => isoItem(0.8, 0.6, 70, [
+  { u: 0, v: 0, w: 0.8, d: 0.6, h: 34, ...shades('#D6AC82'), leftDecor: '<path d="M0 11 H51 M0 22 H51" stroke="#A97B52" stroke-width="2"/>', rightDecor: '<path d="M0 11 H38 M0 22 H38" stroke="#A97B52" stroke-width="2"/>' },
+  P(0.4, 0.3, 34, () => [0.15, 0.4, 0.65].map((u) => [0.15, 0.42].map((v) => { const [x, y] = at(u, v, 34); return `<ellipse cx="${x}" cy="${y - 6}" rx="6" ry="8" fill="${CREAM}" ${line}/>`; }).join('')).join(''), 0.4, 0.3),
+]);
 const puff = (api, x, y, n = 3, tint = '#FFFFFF') => {
   for (let i = 0; i < n; i++) {
     api.later(() => api.effect(x + (i - 1) * 34, y - i * 10, 'wx-puff', `<svg viewBox="0 0 120 90" width="120" height="90"><path d="M20 70 Q4 66 10 50 Q8 30 30 32 Q38 10 62 16 Q86 8 94 32 Q116 34 110 56 Q114 74 94 72 Z" fill="${tint}" opacity=".92"/></svg>`, 1300), i * 120);
   }
 };
 
-const bump = (it, cls) => { it.el.classList.remove(cls); void it.el.offsetWidth; it.el.classList.add(cls); };
+const I = isoDef;
+const W = (...a) => wallDef(R, ...a);
+const sackTop = (it) => it.y + 20;
 
 export const BAKERY = {
-  id: 'bakery', title: 'Snowflake Bakery 🥐', back: ['scene', { id: 'winter' }], weather: CLIMATES.winter, avatar: [440, 470],
-  frame: 'linear-gradient(#F3E6CC 69%, #CBA27A 69%)',
+  id: 'bakery', posKey: 'bakery-iso', title: 'Snowflake Bakery 🥐', back: ['scene', { id: 'winter' }], weather: CLIMATES.winter, light: 'iso',
+  avatar: [3.4, 5.6],
+  frame: '#EFE6DA',
+  iso: R,
   bg,
-  stars: [{ id: 'bakery-sack', x: 82, y: 742 }],
+  onWeather: (api) => api.setArt(api.get('window')),
+  stars: [{ id: 'bakery-sack', gx: 0.6, gy: 6.45 }],
   characters: [{
-    id: 'baker', s: 0.97, x: 990, y: 458,
+    id: 'baker', gx: 6.3, gy: 1.75,
     look: { ...NPC_WINTER.juno, hairStyle: 'bob', hair: '#8B6450', skin: '#E9C3A3', eyes: '#4E9B5A', glasses: 'none', hat: 'none', top: 'sweater', topColor: '#FFFFFF', collar: 'round', neck: 'scarf', neckColor: '#9EDDD4', bottom: 'skirt', bottomColor: '#7A64B0', socks: 'knee', socksColor: '#FBEFB4', shoes: 'boots', shoesColor: '#8B6450' },
     say: ["Welcome! I'm Hanna the baker 🥐", 'Tap the oven to bake something warm!', 'Want to decorate a cake? Try the table 🎂', 'Careful with the flour… poof! ☁️'],
   }],
   items: [
-    { id: 'oven', x: 50, y: 170, w: 380, h: 470, drag: false, data: { busy: false, n: 0 },
+    W('window', 'R', 3.0, 248, 2.2, 150, windowBody),
+    W('clock', 'R', 5.35, 262, 0.7, 150, clockBody,
+      { onTap: (it, api) => { bump(it, 'boing'); api.sfx.click(); api.bubble(it.x + it.w / 2, it.y, pick(['Tick tock… treat o’clock! 🕰️', 'Bong! Time for cinnamon rolls!', 'Tick tock ⏰'])); } }),
+    W('jars', 'R', 6.12, 238, 1.38, 100, jarShelf),
+    W('breadshelf', 'L', 2.9, 246, 2.3, 110, breadShelf),
+    W('menu', 'L', 5.4, 252, 1.9, 120, menuBoard),
+
+    I('rug', 5.9, 5.0, 2.0, 2.0, rugArt, { floor: true }),
+    I('oven', 0, 0.55, 1.3, 2.0, oven, { drag: false, data: { busy: false, n: 0 },
       onTap: (it, api) => {
-        if (it.data.busy) { api.bubble(it.x + 190, it.y + 40, 'Almost ready… ⏲️'); return; }
-        if (ovenCount(api) >= 4) { api.bubble(it.x + 190, it.y + 40, 'Share the treats first! 🥐'); return; }
+        const bx = it.x + it.w / 2, by = it.y + 80;
+        if (it.data.busy) { api.bubble(bx, by, 'Almost ready… ⏲️'); return; }
+        if (ovenCount(api) >= 4) { api.bubble(bx, by, 'Share the treats first! 🥐'); return; }
         it.data.busy = true; it.el.classList.add('wx-baking'); api.sfx.click();
-        api.bubble(it.x + 190, it.y + 40, 'Into the oven… ⏲️');
+        api.bubble(bx, by, 'Into the oven… ⏲️');
         api.later(() => {
           it.el.classList.remove('wx-baking'); it.data.busy = false;
           const kind = OVEN_ORDER[it.data.n++ % OVEN_ORDER.length];
-          const k = ovenCount(api);
-          const f = baked(api, kind, it.x + 70 + (k % 3) * 90, it.y + 300 + Math.floor(k / 3) * 70);
+          const k = ovenCount(api), c = api.get('counter');
+          const spot = c ? { gx: c.gx + 0.15 + (k % 2) * 0.45, gy: c.gy + 0.2 + Math.floor(k / 2) * 0.55, gz: c.def.surface } : clampG(it.gx + 1.4, it.gy + 0.3 + k * 0.4);
+          const f = baked(api, kind, spot);
           api.sfx.win(); api.sparkle(f.x + f.w / 2, f.y + 20, ['✨', '🔥', '💛']);
-          api.bubble(it.x + 190, it.y + 40, { bread: 'Fresh bread! 🍞', pie: 'Blueberry pie! 🥧', cinnamon: 'Cinnamon rolls! 😋' }[kind] + ' Give it to a friend');
+          api.bubble(bx, by, { bread: 'Fresh bread! 🍞', pie: 'Blueberry pie! 🥧', cinnamon: 'Cinnamon rolls! 😋' }[kind] + ' Give it to a friend');
         }, 2200);
-      },
-      art: ovenArt },
-    { id: 'clock', x: 486, y: 116, w: 96, h: 170, drag: false,
-      onTap: (it, api) => { bump(it, 'boing'); api.sfx.click(); api.bubble(it.x + 48, it.y - 6, ['Tick tock… treat o’clock! 🕰️', 'Bong! Time for cinnamon rolls!', 'Tick tock ⏰'][Math.floor(Math.random() * 3)]); },
-      art: () => svg(96, 170, `<defs><linearGradient id="bk-clockwood" x1="0" x2="1"><stop offset="0" stop-color="#9E7450"/><stop offset=".4" stop-color="#C99772"/><stop offset="1" stop-color="#8E6745"/></linearGradient></defs>
-        <path d="M10 60 Q10 6 48 4 Q86 6 86 60 V160 Q86 166 80 166 H16 Q10 166 10 160 Z" fill="url(#bk-clockwood)" stroke="${INK}" stroke-width="2.2"/>
-        <circle cx="48" cy="50" r="30" fill="#FBF7EF" stroke="${INK}" stroke-width="2.2"/><circle cx="48" cy="50" r="25" fill="none" stroke="#E2D8C4" stroke-width="1.5"/>
-        <g fill="#7A64B0">${Array.from({ length: 12 }, (_, i) => { const a = (i / 12) * Math.PI * 2; return `<circle cx="${(48 + Math.cos(a) * 22).toFixed(1)}" cy="${(50 + Math.sin(a) * 22).toFixed(1)}" r="${i % 3 ? 1.3 : 2.2}"/>`; }).join('')}</g>
-        <path d="M48 50 L48 34 M48 50 L60 56" stroke="${INK}" stroke-width="2.6" stroke-linecap="round"/><circle cx="48" cy="50" r="2.5" fill="${INK}"/>
-        <rect x="24" y="90" width="48" height="64" rx="8" fill="#3A3150" stroke="${INK}" stroke-width="2"/>
-        <g class="wx-pendulum"><path d="M48 92 V136" stroke="url(#bk-brass)" stroke-width="2.5"/><path d="M48 92 V136" stroke="#D9B36A" stroke-width="2.5"/><circle cx="48" cy="140" r="9" fill="#E9C77E" stroke="${INK}" stroke-width="1.8"/></g>
-        <path d="M30 96 L42 148" stroke="#fff" stroke-width="3" opacity=".15"/><path d="M18 30 Q22 14 36 10" stroke="#fff" stroke-width="2.5" opacity=".35" fill="none"/>`) },
-    { id: 'herbs', x: 664, y: 250, w: 64, h: 78, art: () => svg(64, 78, `
-      <g stroke="#5E9C7E" stroke-width="2.2" stroke-linecap="round" fill="none"><path d="M32 46 Q26 26 18 8"/><path d="M32 46 Q34 22 32 2"/><path d="M32 46 Q40 26 48 10"/></g>
-      <g fill="#86C2A2">${[[20, 12], [24, 22], [28, 32], [32, 6], [33, 18], [33, 30], [46, 14], [42, 24], [38, 34]].map(([x, y], i) => `<ellipse cx="${x}" cy="${y}" rx="3.2" ry="6" transform="rotate(${i % 2 ? 30 : -30} ${x} ${y})"/>`).join('')}</g>
-      <path d="M12 44 H52 L46 74 H18 Z" fill="#7FC4BC" stroke="${INK}" stroke-width="2"/><rect x="9" y="40" width="46" height="9" rx="3" fill="#A9E2D8" stroke="${INK}" stroke-width="2"/><path d="M20 52 V70" stroke="#fff" stroke-width="3" opacity=".35"/>`) },
-    { id: 'cat', x: 840, y: 270, w: 96, h: 56, cls: 'squish',
-      onTap: (it, api) => { bump(it, 'boing'); api.sfx.boing(); api.bubble(it.x + 48, it.y - 6, ['Purrr… 💤', '*stretches* Mrrrow?', 'Zzz… warm window…'][Math.floor(Math.random() * 3)]); },
-      art: () => svg(96, 56, `<defs><radialGradient id="bk-cat" cx=".45" cy=".35" r=".7"><stop offset="0" stop-color="#C9C3DD"/><stop offset="1" stop-color="#948DB0"/></radialGradient></defs>
-        ${shadow(48, 52, 42, 4)}<path class="tail" d="M78 44 Q96 40 90 24" stroke="${INK}" stroke-width="9" fill="none" stroke-linecap="round"/><path class="tail" d="M78 44 Q96 40 90 24" stroke="#A9A3C4" stroke-width="5" fill="none" stroke-linecap="round"/>
-        <ellipse cx="52" cy="38" rx="34" ry="16" fill="url(#bk-cat)" stroke="${INK}" stroke-width="2"/>
-        <path d="M44 24 Q48 34 44 44 M56 23 Q60 34 57 46 M68 26 Q71 36 69 46" stroke="#857EA3" stroke-width="2" fill="none" opacity=".6"/>
-        <circle cx="24" cy="36" r="14" fill="url(#bk-cat)" stroke="${INK}" stroke-width="2"/><path d="M14 28 L12 16 L22 24 M30 23 L36 14 L36 27" fill="#A9A3C4" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round"/>
-        <path d="M17 36 q3 2 6 0 M26 36 q3 2 6 0" stroke="${INK}" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M22 41 l2 1.4 2 -1.4" stroke="${INK}" stroke-width="1.2" fill="none"/>
-        <ellipse cx="34" cy="48" rx="9" ry="4" fill="#DAD5EA" stroke="${INK}" stroke-width="1.5"/>`) },
-    { id: 'table', x: 600, y: 450, w: 440, h: 260, drag: false,
-      onTap: (it, api) => cakeGame(api, it),
-      art: tableArt },
-    { id: 'jar', x: 612, y: 398, w: 80, h: 110,
-      onTap: (it, api) => {
-        if (api.count('cookie') >= 3) { api.bubble(it.x + 40, it.y - 6, 'Eat those cookies first! 🍪'); return; }
-        bump(it, 'boing'); api.sfx.pop(); baked(api, 'cookie', it.x + 10 + api.count('cookie') * 30, it.y - 60);
-        api.bubble(it.x + 40, it.y - 70, 'A snowflake cookie! ❄️');
-      },
-      art: () => svg(80, 110, `<defs><linearGradient id="bk-glass" x1="0" x2="1"><stop offset="0" stop-color="#CFE3F0" stop-opacity=".85"/><stop offset=".3" stop-color="#FFFFFF" stop-opacity=".7"/><stop offset="1" stop-color="#BBD3E4" stop-opacity=".85"/></linearGradient></defs>
-        ${shadow(40, 106, 34, 4)}<path d="M10 34 Q8 30 14 28 H66 Q72 30 70 34 V96 Q70 106 60 106 H20 Q10 106 10 96 Z" fill="url(#bk-glass)" stroke="${INK}" stroke-width="2"/>
-        ${[[26, 92], [50, 94], [38, 76], [22, 62], [56, 70], [40, 52]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="11" fill="#D9A86C" stroke="#A8743E" stroke-width="1.4"/><circle cx="${x - 3}" cy="${y - 2}" r="1.8" fill="#7A4A30"/><circle cx="${x + 4}" cy="${y + 3}" r="1.6" fill="#7A4A30"/>`).join('')}
-        <path d="M18 40 V96" stroke="#fff" stroke-width="4" opacity=".55" stroke-linecap="round"/>
-        <rect x="8" y="16" width="64" height="16" rx="6" fill="#C99772" stroke="${INK}" stroke-width="2"/><ellipse cx="40" cy="14" rx="12" ry="6" fill="#A87A5A" stroke="${INK}" stroke-width="2"/>`) },
-    { id: 'mixer', x: 700, y: 372, w: 120, h: 140,
-      onTap: (it, api) => { it.el.classList.add('cooking'); api.sfx.pour(); api.bubble(it.x + 60, it.y - 6, 'Whirrr… mixing the batter!'); api.later(() => it.el.classList.remove('cooking'), 1800); },
-      art: () => svg(120, 140, `<defs><linearGradient id="bk-mix" x1="0" x2="1"><stop offset="0" stop-color="#5FA7A0"/><stop offset=".35" stop-color="#A9E2D8"/><stop offset="1" stop-color="#4E968F"/></linearGradient></defs>
-        ${shadow(60, 136, 50, 5)}<g class="steam-big"><path class="ln" stroke="#fff" stroke-width="3" d="M44 70 q-6 -8 0 -16 M76 70 q-6 -8 0 -16"/></g>
-        <rect x="14" y="118" width="92" height="18" rx="7" fill="url(#bk-mix)" stroke="${INK}" stroke-width="2"/>
-        <path d="M80 120 V50 Q80 30 64 26 H40 Q16 26 14 46 Q14 62 34 64 H66 V120 Z" fill="url(#bk-mix)" stroke="${INK}" stroke-width="2"/>
-        <path d="M44 64 V82" stroke="#AEB8C8" stroke-width="4"/>
-        <path d="M22 82 H74 Q72 116 48 118 Q24 116 22 82 Z" fill="url(#bk-steel)" stroke="${INK}" stroke-width="2"/><ellipse cx="48" cy="82" rx="26" ry="5" fill="#FFF5DD" stroke="${INK}" stroke-width="1.6"/>
-        <path d="M24 34 Q34 30 50 30" stroke="#fff" stroke-width="3" opacity=".5" fill="none" stroke-linecap="round"/><circle cx="72" cy="44" r="4" fill="url(#bk-brass)" stroke="${INK}" stroke-width="1.4"/>`) },
-    { id: 'rollingpin', x: 820, y: 528, w: 150, h: 40,
-      onTap: (it, api) => { bump(it, 'wx-roll'); api.sfx.drop(); api.bubble(it.x + 75, it.y - 10, 'Roll, roll, roll the dough!'); },
-      art: () => svg(150, 40, `<defs><linearGradient id="bk-pin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F0D2A8"/><stop offset=".45" stop-color="#E2B888"/><stop offset="1" stop-color="#B8885E"/></linearGradient></defs>
-        ${shadow(75, 36, 62, 4)}<rect x="4" y="15" width="26" height="10" rx="5" fill="#C99772" stroke="${INK}" stroke-width="2"/><rect x="120" y="15" width="26" height="10" rx="5" fill="#C99772" stroke="${INK}" stroke-width="2"/>
-        <rect x="28" y="6" width="94" height="28" rx="12" fill="url(#bk-pin)" stroke="${INK}" stroke-width="2"/><path d="M36 13 H112" stroke="#fff" stroke-width="3" opacity=".5" stroke-linecap="round"/>
-        <g fill="#fff" opacity=".85"><circle cx="58" cy="26" r="1.6"/><circle cx="86" cy="22" r="1.3"/></g>`) },
-    { id: 'sack', x: 40, y: 680, w: 150, h: 170,
-      onTap: (it, api) => { bump(it, 'shake'); api.sfx.boing(); puff(api, it.x + 75, it.y + 20); api.bubble(it.x + 75, it.y - 30, 'Poof! A flour cloud ☁️'); },
-      art: sackArt },
-    { id: 'sack2', x: 196, y: 726, w: 120, h: 136,
-      onTap: (it, api) => { bump(it, 'shake'); api.sfx.boing(); puff(api, it.x + 60, it.y + 10, 2); api.bubble(it.x + 60, it.y - 30, 'Achoo! 🤧'); },
-      art: sackArt },
-    { id: 'case', x: 1150, y: 410, w: 420, h: 300, drag: false,
+      } }),
+    I('counter', 0, 2.75, 1.1, 2.4, counter, { drag: false, surface: 92 }),
+    I('rack', 1.55, 0.1, 1.2, 0.6, proofRack),
+    I('bench', 3.1, 0.1, 2.0, 0.7, bench, { surface: 48 }),
+    I('cooler', 7.55, 0.1, 1.3, 0.8, cooler),
+    I('table', 2.6, 3.5, 2.4, 1.3, island, { drag: false, surface: 86, onTap: (it, api) => cakeGame(api, it) }),
+    I('case', 5.3, 2.9, 3.2, 1.0, caseArt, { drag: false, surface: 106,
       onTap: (it, api) => {
         const kinds = ['croissant', 'macaron', 'donut'];
-        if (kinds.reduce((n, k) => n + api.count(k), 0) >= 3) { api.bubble(it.x + 210, it.y - 10, 'Enjoy those pastries first! 🥐'); return; }
+        if (kinds.reduce((n, k) => n + api.count(k), 0) >= 3) { api.bubble(it.x + it.w / 2, it.y + 30, 'Enjoy those pastries first! 🥐'); return; }
         it.data.n = (it.data.n || 0) + 1;
         const kind = kinds[it.data.n % 3];
-        api.sfx.pop(); food(api, kind, it.x + 40 + (it.data.n % 3) * 110, it.y + 200);
-        api.bubble(it.x + 210, it.y - 10, { croissant: 'A buttery croissant! 🥐', macaron: 'A mint macaron! 💚', donut: 'A frosted donut! 🍩' }[kind]);
-      },
-      art: () => svg(420, 300, `<defs>
-          <linearGradient id="bk-case-glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E4F1F9" stop-opacity=".55"/><stop offset=".5" stop-color="#FFFFFF" stop-opacity=".18"/><stop offset="1" stop-color="#CFE3F0" stop-opacity=".5"/></linearGradient>
-          <linearGradient id="bk-case-wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D6AC82"/><stop offset="1" stop-color="#A57B55"/></linearGradient>
-          <linearGradient id="bk-case-back" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBF5E8"/><stop offset="1" stop-color="#EFE3CB"/></linearGradient></defs>
-        ${shadow(210, 294, 206, 9, 0.18)}
-        <rect x="10" y="166" width="400" height="128" rx="6" fill="url(#bk-case-wood)" stroke="${INK}" stroke-width="2.4"/>
-        ${[24, 156, 288].map((x) => `<rect x="${x}" y="182" width="108" height="96" rx="6" fill="none" stroke="#8E6745" stroke-width="2"/><path d="M${x + 6} 274 V186 H${x + 102}" stroke="#E9C9A2" stroke-width="2" fill="none" opacity=".7"/>`).join('')}
-        <rect x="20" y="20" width="380" height="146" fill="url(#bk-case-back)" stroke="${INK}" stroke-width="2"/>
-        <path d="M22 70 H398 M22 118 H398" stroke="#C9DCEA" stroke-width="4"/>
-        ${[60, 150, 240, 330].map((x, i) => `<g transform="translate(${x - 34} 36) scale(.7)"><path d="M6 46 Q4 26 22 20 Q30 4 48 6 Q66 4 74 20 Q92 26 90 46 Q72 36 48 38 Q24 36 6 46 Z" fill="${i % 2 ? '#E9B970' : '#F0C27A'}" stroke="${INK}" stroke-width="2.4"/><path d="M28 22 Q34 30 30 38 M48 10 V36 M68 22 Q62 30 66 38" stroke="#C98E4E" stroke-width="2" fill="none"/></g>`).join('')}
-        ${[50, 92, 134, 196, 238, 280, 330, 372].map((x, i) => { const c = ['#CDBDF0', '#A9E2D8', '#F6E39A', '#BFDDF6'][i % 4]; return `<g transform="translate(${x} 100)"><ellipse cx="0" cy="8" rx="16" ry="7" fill="${c}" stroke="${INK}" stroke-width="1.6"/><rect x="-15" y="0" width="30" height="5" fill="#FBF7EF"/><ellipse cx="0" cy="-1" rx="16" ry="7" fill="${c}" stroke="${INK}" stroke-width="1.6"/></g>`; }).join('')}
-        ${[70, 170, 270, 360].map((x, i) => i % 2 ? `<g transform="translate(${x} 146)"><ellipse cx="0" cy="0" rx="26" ry="12" fill="#E2B272" stroke="${INK}" stroke-width="1.8"/><ellipse cx="0" cy="-3" rx="20" ry="8" fill="#CDBDF0"/><ellipse cx="0" cy="-3" rx="6" ry="3" fill="#FBF5E8" stroke="${INK}" stroke-width="1.2"/></g>`
-          : `<g transform="translate(${x} 146)"><ellipse cx="0" cy="0" rx="24" ry="12" fill="#D79F5E" stroke="${INK}" stroke-width="1.8"/><path d="M0 0 m-3 0 a3 2 0 1 1 6 0 a8 5 0 1 1 -16 0 a14 9 0 1 1 28 0" fill="none" stroke="#9A5E33" stroke-width="2.2"/></g>`).join('')}
-        <rect x="20" y="20" width="380" height="146" fill="url(#bk-case-glass)"/>
-        <path d="M60 160 L140 26 M90 160 L160 40 M300 160 L370 40" stroke="#fff" stroke-width="7" opacity=".28" stroke-linecap="round"/>
-        <rect x="20" y="20" width="380" height="146" fill="none" stroke="#C9A35A" stroke-width="4"/>
-        <rect x="6" y="8" width="408" height="16" rx="5" fill="url(#bk-case-wood)" stroke="${INK}" stroke-width="2.2"/>
-        ${tag(210, 228, 'Tap for a pastry', 190)}`) },
-    { id: 'basket', x: 1176, y: 338, w: 150, h: 84,
+        api.sfx.pop(); food(api, kind, 0, 0, { gx: it.gx + 0.2 + (it.data.n % 3) * 0.55, gy: it.gy + 0.35, gz: it.def.surface });
+        api.bubble(it.x + it.w / 2, it.y + 30, { croissant: 'A buttery croissant! 🥐', macaron: 'A mint macaron! 💚', donut: 'A frosted donut! 🍩' }[kind]);
+      } }),
+    I('sack', 0.35, 6.2, 0.9, 0.9, sackArt(0.9),
+      { onTap: (it, api) => { bump(it, 'shake'); api.sfx.boing(); puff(api, it.x + it.w / 2, sackTop(it)); api.bubble(it.x + it.w / 2, it.y - 20, 'Poof! A flour cloud ☁️'); } }),
+    I('sack2', 1.4, 6.95, 0.72, 0.72, sackArt(0.72),
+      { onTap: (it, api) => { bump(it, 'shake'); api.sfx.boing(); puff(api, it.x + it.w / 2, sackTop(it), 2); api.bubble(it.x + it.w / 2, it.y - 20, 'Achoo! 🤧'); } }),
+    I('eggs', 2.2, 7.1, 0.8, 0.6, eggCrate),
+    I('cafetable', 6.55, 5.55, 0.9, 0.9, cafeTable, { surface: 72 }),
+    I('stool1', 6.0, 6.55, 0.55, 0.55, stool(TEAL)),
+    I('stool2', 7.6, 5.75, 0.55, 0.55, stool(SUN)),
+    // small things: drag them around and onto the counter, island, bench, case or café table
+    I('cat', 3.3, 0.2, 0.7, 0.4, catArt, { small: true, gz: 48, cls: 'squish',
+      onTap: (it, api) => { bump(it, 'boing'); api.sfx.boing(); api.bubble(it.x + it.w / 2, it.y, pick(['Purrr… 💤', '*stretches* Mrrrow?', 'Zzz… warm window…'])); } }),
+    I('herbs', 4.55, 0.25, 0.35, 0.35, herbsArt, { small: true, gz: 48 }),
+    I('mixer', 0.3, 4.45, 0.45, 0.45, mixerArt, { small: true, gz: 92,
+      onTap: (it, api) => { it.el.classList.add('cooking'); api.sfx.pour(); api.bubble(it.x + it.w / 2, it.y, 'Whirrr… mixing the batter!'); api.later(() => it.el.classList.remove('cooking'), 1800); } }),
+    I('jar', 2.75, 3.62, 0.35, 0.35, jarArt, { small: true, gz: 86,
       onTap: (it, api) => {
-        if (api.count('pretzel') >= 2) { api.bubble(it.x + 75, it.y - 6, 'One pretzel at a time! 🥨'); return; }
-        api.sfx.pop(); baked(api, 'pretzel', it.x + 160 + api.count('pretzel') * 60, it.y - 20);
-        api.bubble(it.x + 75, it.y - 6, 'A warm pretzel! 🥨');
-      },
-      art: () => svg(150, 84, `<defs><linearGradient id="bk-wicker" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E6C08A"/><stop offset="1" stop-color="#B98A55"/></linearGradient></defs>
-        <g transform="rotate(-14 60 30)"><rect x="20" y="4" width="96" height="20" rx="10" fill="#E2AE68" stroke="${INK}" stroke-width="2"/><path d="M40 8 l6 12 M60 8 l6 12 M80 8 l6 12" stroke="#F6DCA8" stroke-width="3" stroke-linecap="round"/></g>
-        <g transform="rotate(10 90 30)"><rect x="40" y="10" width="96" height="18" rx="9" fill="#D99D58" stroke="${INK}" stroke-width="2"/><path d="M62 13 l6 11 M84 13 l6 11 M106 13 l6 11" stroke="#F6DCA8" stroke-width="3" stroke-linecap="round"/></g>
-        <path d="M8 34 H142 L130 80 H20 Z" fill="url(#bk-wicker)" stroke="${INK}" stroke-width="2"/>
-        <g stroke="#9E7046" stroke-width="1.6" opacity=".7" fill="none">${[46, 58, 70].map((y) => `<path d="M${10 + (y - 34) * 0.25} ${y} H${140 - (y - 34) * 0.25}"/>`).join('')}${Array.from({ length: 9 }, (_, i) => `<path d="M${22 + i * 14} 36 V78"/>`).join('')}</g>
-        <rect x="2" y="30" width="146" height="8" rx="3" fill="#C99772" stroke="${INK}" stroke-width="2"/><path d="M20 34 H120" stroke="#fff" stroke-width="2" opacity=".4"/>`) },
-    { id: 'bell', x: 1488, y: 360, w: 70, h: 62,
-      onTap: (it, api) => { bump(it, 'punch'); api.sfx.click(); api.sparkle(it.x + 35, it.y + 10, ['🔔', '✨']); api.bubble(it.x + 35, it.y - 6, 'Ding! What would you like? ✨'); },
-      art: () => svg(70, 62, `${shadow(35, 58, 30, 4)}<rect x="4" y="46" width="62" height="12" rx="4" fill="#C99772" stroke="${INK}" stroke-width="2"/>
-        <path d="M10 46 Q10 14 35 14 Q60 14 60 46 Z" fill="url(#bk-brass)" stroke="${INK}" stroke-width="2"/><path d="M30 6 h10 v8 h-10 z" fill="#C39A52" stroke="${INK}" stroke-width="1.8"/>
-        <path d="M18 38 Q18 22 32 20" stroke="#fff" stroke-width="3" opacity=".6" fill="none" stroke-linecap="round"/>`) },
+        const n = api.count('cookie');
+        if (n >= 3) { api.bubble(it.x + it.w / 2, it.y, 'Eat those cookies first! 🍪'); return; }
+        bump(it, 'boing'); api.sfx.pop(); baked(api, 'cookie', { ...clampG(it.gx + 0.35 + n * 0.3, it.gy + 0.4), gz: it.gz });
+        api.bubble(it.x + it.w / 2, it.y - 20, 'A snowflake cookie! ❄️');
+      } }),
+    I('rollingpin', 3.85, 4.45, 0.6, 0.2, pinArt, { small: true, gz: 86,
+      onTap: (it, api) => { bump(it, 'wx-roll'); api.sfx.drop(); api.bubble(it.x + it.w / 2, it.y - 10, 'Roll, roll, roll the dough!'); } }),
+    I('basket', 7.2, 3.1, 0.7, 0.5, basketArt, { small: true, gz: 106,
+      onTap: (it, api) => {
+        const n = api.count('pretzel');
+        if (n >= 2) { api.bubble(it.x + it.w / 2, it.y, 'One pretzel at a time! 🥨'); return; }
+        api.sfx.pop(); baked(api, 'pretzel', { ...clampG(it.gx + 0.05 + n * 0.38, it.gy + 0.42), gz: it.gz });
+        api.bubble(it.x + it.w / 2, it.y, 'A warm pretzel! 🥨');
+      } }),
+    I('bell', 8.05, 3.25, 0.3, 0.3, bellArt, { small: true, gz: 106,
+      onTap: (it, api) => { bump(it, 'punch'); api.sfx.click(); api.sparkle(it.x + it.w / 2, it.y + 10, ['🔔', '✨']); api.bubble(it.x + it.w / 2, it.y, 'Ding! What would you like? ✨'); } }),
+    I('vase', 6.88, 5.88, 0.25, 0.25, vaseArt, { small: true, gz: 72 }),
   ],
 };
