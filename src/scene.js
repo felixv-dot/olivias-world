@@ -405,6 +405,7 @@ export function sceneScreen(app, ctx, def) {
     });
   }
   def.init?.(api);
+  window.__owApi = api; // handy for testing in the console
 
   return {
     destroy: () => {
