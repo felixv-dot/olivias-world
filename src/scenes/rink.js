@@ -339,7 +339,7 @@ export const RINK = {
               g.data.goals++; api.setArt(g); api.sfx.win();
               api.sparkle(g.x + g.w / 2, g.y + g.h * 0.6, ['🏒', '✨', '⭐']);
               api.bubble(g.x + g.w / 2, g.y - 10, g.data.goals === 3 ? 'Hat trick! 🎉' : 'GOAL! 🏒');
-              if (g.data.goals === 3 && !api.starFound('rink-goals')) api.addStar('rink-goals', 0, 0, { spawned: true, gx: g.gx + 0.6, gy: g.gy + 1.1 });
+              if (g.data.goals % 3 === 0) api.earn(10); if (g.data.goals === 3 && !api.starFound('rink-goals')) api.addStar('rink-goals', 0, 0, { spawned: true, gx: g.gx + 0.6, gy: g.gy + 1.1 });
             } else api.bubble(g.x + g.w / 2, g.y - 10, 'Missed! Try again!');
             api.later(() => tween(api, it, home, 700, { done: () => { it.data.busy = false; } }), 450);
           } });

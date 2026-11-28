@@ -205,7 +205,7 @@ function robotGame(api, bench) {
       const it = toy(api, spec, { gx: bench.gx + 0.95 + (api.count('toy') % 3) * 0.5, gy: bench.gy + 0.45, gz: top });
       api.sparkle(it.x + it.w / 2, it.y + 40, ['🤖', '✨', '⚙️']);
       api.bubble(it.x + it.w / 2, it.y - 10, 'Your robot is ready! 🤖');
-      if (!api.starFound('workshop-robot')) api.addStar('workshop-robot', 0, 0, { spawned: true, gx: bench.gx + 2.45, gy: bench.gy + 0.55, gz: top });
+      api.earn(10); if (!api.starFound('workshop-robot')) api.addStar('workshop-robot', 0, 0, { spawned: true, gx: bench.gx + 2.45, gy: bench.gy + 0.55, gz: top });
     };
     refresh();
   });

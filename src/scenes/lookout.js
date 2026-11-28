@@ -171,7 +171,7 @@ function starGame(api) {
       if (next >= c.pts.length) {
         api.sfx.win(); status.textContent = `You found ${c.name}!`;
         // the prize star lands on the wooden deck, next to the telescope
-        if (level === CONSTELLATIONS.length - 1 && !api.starFound('lookout-sky')) { api.addStar('lookout-sky', 0, 0, { spawned: true, gx: 4.25, gy: 1.5, gz: 14 }); status.textContent += ' A star fell from the sky! ⭐'; }
+        api.earn(5); if (level === CONSTELLATIONS.length - 1 && !api.starFound('lookout-sky')) { api.addStar('lookout-sky', 0, 0, { spawned: true, gx: 4.25, gy: 1.5, gz: 14 }); status.textContent += ' A star fell from the sky! ⭐'; }
         else if (level < CONSTELLATIONS.length - 1) status.textContent += ` (${level + 1} of ${CONSTELLATIONS.length})`;
       }
       draw();

@@ -27,6 +27,12 @@ export function starBadge() {
   return el('div', 'star-badge', `<span>⭐</span><b class="star-count">${state.stars.length}</b>/${TOTAL_STARS}`);
 }
 
+export function coinBadge(onClick) {
+  const b = el(onClick ? 'button' : 'div', 'coin-badge', `<span>🪙</span><b class="coin-count">${state.coins ?? 0}</b>`);
+  if (onClick) { b.setAttribute('aria-label', 'Coins — open the shop'); b.onclick = onClick; }
+  return b;
+}
+
 export function refreshStars() {
   document.querySelectorAll('.star-count').forEach((n) => { n.textContent = state.stars.length; });
 }
@@ -37,7 +43,7 @@ export function setWeather(key, w) {
   save();
 }
 
-export function topBar({ title, onBack, backLabel = 'Back', onWeather, climate = CLIMATES.sunny, onChars }) {
+export function topBar({ title, onBack, backLabel = 'Back', onWeather, climate = CLIMATES.sunny, onChars, onShop, onAlbum, onCamera }) {
   const bar = el('div', 'topbar');
   const back = el('button', 'tb-btn back', `◀<span class="lbl"> ${backLabel}</span>`);
   back.setAttribute('aria-label', 'Back to ' + backLabel);
@@ -53,7 +59,15 @@ export function topBar({ title, onBack, backLabel = 'Back', onWeather, climate =
     chars.onclick = onChars;
     right.append(chars);
   }
-  right.append(sound, starBadge());
+  const extra = [[onCamera, '📷', 'Take a photo', 'camera'], [onAlbum, '📖', 'Album', 'album'], [onShop, '🛍️', 'Shop', 'shop']];
+  for (const [fn, icon, label, cls] of extra) {
+    if (!fn) continue;
+    const b = el('button', 'tb-btn icon ' + cls, icon);
+    b.setAttribute('aria-label', label);
+    b.onclick = fn;
+    right.append(b);
+  }
+  right.append(sound, starBadge(), coinBadge(onShop));
   if (onWeather) {
     const w = el('div', 'weather');
     const { key, options } = climate;

@@ -1,7 +1,8 @@
 // Galaxy: every world is a planet. Sunny Planet is open, the others are coming soon.
 import { render, animate } from './avatar.js';
 import { getLook, activeChar } from './state.js';
-import { el, starBadge, rotateHint } from './ui.js';
+import { el, starBadge, coinBadge, rotateHint } from './ui.js';
+import { dailyGift } from './economy.js';
 import { installTip } from './mobile.js';
 import { openSettings } from './settings.js';
 
@@ -95,7 +96,13 @@ export function galaxyScreen(app, ctx) {
   const gear = el('button', 'btn alt gear-btn', '⚙️');
   gear.setAttribute('aria-label', 'Account and settings');
   gear.onclick = () => openSettings(root, ctx);
-  headRight.append(charsBtn, starBadge(), gear);
+  const shopBtn = el('button', 'btn alt icon-btn', '🛍️');
+  shopBtn.setAttribute('aria-label', 'Shop');
+  shopBtn.onclick = () => ctx.go('shop', { back: ['galaxy'] });
+  const albumBtn = el('button', 'btn alt icon-btn', '📖');
+  albumBtn.setAttribute('aria-label', 'Album');
+  albumBtn.onclick = () => ctx.go('album', { back: ['galaxy'] });
+  headRight.append(charsBtn, albumBtn, shopBtn, starBadge(), coinBadge(() => ctx.go('shop', { back: ['galaxy'] })), gear);
   head.append(el('div', 'logo', "Olivia's World"), headRight);
   root.append(head, el('div', 'galaxy-title', 'Choose a planet'));
 
@@ -136,7 +143,17 @@ export function galaxyScreen(app, ctx) {
   const anim = animate(() => meAvatar.firstElementChild);
   meAvatar.onclick = () => anim.happy();
 
-  root.append(el('div', 'version', 'v1.9'));
+  root.append(el('div', 'version', 'v2.0'));
+  // Daily gift: a present on the first visit of the day.
+  setTimeout(() => {
+    if (!root.isConnected) return;
+    const n = dailyGift();
+    if (!n) return;
+    const g = el('div', 'daily-gift', `<div class="dg-box">🎁</div><div><b>Daily gift!</b><br>+${n} 🪙 coins. Come back tomorrow for more!</div>`);
+    g.onclick = () => g.remove();
+    root.append(g);
+    setTimeout(() => g.remove(), 5000);
+  }, 900);
   root.append(rotateHint());
   const tip = installTip();
   if (tip) root.append(tip);

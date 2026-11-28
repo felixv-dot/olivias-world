@@ -462,7 +462,7 @@ function decorate(api, tray) {
       }, { spawned: true });
       api.sparkle(it.x + 30, it.y + 30, ['✨', '🍪', '⭐']);
       api.bubble(it.x + 30, it.y - 10, 'Fresh from the oven! Give it to a friend.');
-      if (!api.starFound('market-cookie')) api.addStar('market-cookie', 0, 0, { spawned: true, gx: tray.gx - 0.38, gy: tray.gy + 0.1, gz: 72 });
+      api.earn(10); if (!api.starFound('market-cookie')) api.addStar('market-cookie', 0, 0, { spawned: true, gx: tray.gx - 0.38, gy: tray.gy + 0.1, gz: 72 });
     };
     refresh();
   });

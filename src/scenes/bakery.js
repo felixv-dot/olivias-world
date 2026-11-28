@@ -204,7 +204,7 @@ function cakeGame(api, table) {
       }, { spawned: true });
       api.sparkle(it.x + 48, it.y + 40, ['✨', '🎂', '⭐']);
       api.bubble(it.x + 48, it.y - 20, 'What a cake! Give it to a friend 🎂');
-      if (!api.starFound('bakery-cake')) api.addStar('bakery-cake', 0, 0, { spawned: true, gx: table.gx + 1.3, gy: table.gy + 0.05, gz: top });
+      api.earn(10); if (!api.starFound('bakery-cake')) api.addStar('bakery-cake', 0, 0, { spawned: true, gx: table.gx + 1.3, gy: table.gy + 0.05, gz: top });
     };
     refresh();
   });

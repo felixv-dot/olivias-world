@@ -133,7 +133,7 @@ const goTo = (id) => (it, api) => { it.el.classList.add('press'); setTimeout(() 
 const place = (id, x, y, w, h, art) => ({ id, x, y, w, h, drag: false, cls: 'place', art, onTap: goTo(id) });
 
 export const MAP = {
-  id: 'sunny', width: MW, startX: 760, title: 'Sunny Planet ☀️', backLabel: 'Galaxy', back: ['galaxy'], weather: true, outdoor: true, noAvatar: true,
+  id: 'sunny', isMap: true, width: MW, startX: 760, title: 'Sunny Planet ☀️', backLabel: 'Galaxy', back: ['galaxy'], weather: true, outdoor: true, noAvatar: true,
   frame: 'linear-gradient(#A9DCFF 50%, #7FD3E0 50%)',
   bg: mapBg,
   items: [

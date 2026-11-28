@@ -99,7 +99,7 @@ function paint(api) {
       }
       api.sfx.win();
       const easel = api.get('easel');
-      if (!api.starFound('studio-painting')) api.addStar('studio-painting', 0, 0, { spawned: true, gx: (easel?.gx ?? 3.4) + 0.5, gy: (easel?.gy ?? 2.4) + 1.1 });
+      api.earn(10); if (!api.starFound('studio-painting')) api.addStar('studio-painting', 0, 0, { spawned: true, gx: (easel?.gx ?? 3.4) + 0.5, gy: (easel?.gy ?? 2.4) + 1.1 });
     };
   });
 }

@@ -1,6 +1,7 @@
 // Olivia's room — the first isometric "dollhouse from above" room (Unpacking-style prototype).
 import { room, roomShell, isoItem, at, shades, proj, isoDef, wallDef } from '../iso.js';
 import { svg, text, starPath, stringLights, wearable } from './common.js';
+import { currentWall, currentFloor, addHomeItems, decorateTool } from '../decorate.js';
 
 const R = room({ cols: 8, rows: 7, ox: 768, oy: 384, wallH: 300 });
 R.charScale = 0.62;
@@ -14,15 +15,12 @@ const bg = (w) => {
   return svg(1600, 900, `
   <defs>
     <radialGradient id="rm-bd" cx="50%" cy="55%" r="70%"><stop offset="0" stop-color="#F6F1FB"/><stop offset="1" stop-color="#DCD3EE"/></radialGradient>
-    <pattern id="rm-wl" width="60" height="60" patternUnits="userSpaceOnUse" patternTransform="matrix(1,0.5,0,1,0,0)">
-      <rect width="60" height="60" fill="#E6DEF6"/><path d="M30 0 V60" stroke="#DCD2F0" stroke-width="14"/>${starPath(30, 30, 4, '#F3E7B0')}</pattern>
-    <pattern id="rm-wr" width="60" height="60" patternUnits="userSpaceOnUse" patternTransform="matrix(1,-0.5,0,1,0,0)">
-      <rect width="60" height="60" fill="#DDD3F0"/><path d="M30 0 V60" stroke="#D3C8EA" stroke-width="14"/>${starPath(30, 30, 4, '#EEE0A8')}</pattern>
+    ${currentWall().defs('rm-wl', 'rm-wr')}${currentFloor().defs?.('rm-fl') || ''}
     <linearGradient id="rm-light" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF6DA" stop-opacity=".55"/><stop offset="1" stop-color="#FFF6DA" stop-opacity="0"/></linearGradient>
   </defs>
   <rect width="1600" height="900" fill="url(#rm-bd)"/>
   <ellipse cx="${(lx + rx) / 2}" cy="${fy + 6}" rx="560" ry="46" fill="#3E3252" opacity=".10"/>
-  ${roomShell(R, { floor: '#DDBA93', floorLines: 'planks', wallL: '#E6DEF6', wallR: '#DDD3F0', wallPatternL: 'rm-wl', wallPatternR: 'rm-wr' })}
+  ${(() => { const wp = currentWall(), fl = currentFloor(), fp = fl.defs?.('rm-fl'); return roomShell(R, { floor: fl.floor, floorLines: fl.floorLines || 'planks', floorPattern: fp ? 'rm-fl' : '', wallL: wp.wallL, wallR: wp.wallR, wallPatternL: wp.defs('rm-wl', 'rm-wr') ? 'rm-wl' : '', wallPatternR: wp.defs('rm-wl', 'rm-wr') ? 'rm-wr' : '' }); })()}
   <polygon points="${[proj(R, 2.3, 0.05), proj(R, 4.3, 0.05), proj(R, 6.2, 3.4), proj(R, 4.2, 3.4)].map((p) => p.join(',')).join(' ')}" fill="url(#rm-light)" opacity="${w.weather === 'sun' ? 1 : 0.35}"/>`);
 };
 
@@ -163,6 +161,8 @@ export const ROOM = {
   iso: R,
   bg,
   onWeather: (api) => api.setArt(api.get('window')),
+  init: (api) => addHomeItems(api),
+  tools: [decorateTool(R, 'room-v1')],
   stars: [{ id: 'home-cushion', gx: 5.7, gy: 4.5 }],
   items: [
     W('lights', 'L', 0.3, 290, 6.4, 50, () => stringLights(4, 6.4 * 64 - 4, 6, 14)),

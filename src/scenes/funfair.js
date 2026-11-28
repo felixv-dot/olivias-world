@@ -373,7 +373,7 @@ function cansGame(api) {
       if (!left) {
         over = true; draw(hit); api.sfx.win();
         status.textContent = 'All cans down! You win! 🎉';
-        if (!api.starFound('funfair-cans')) { api.addStar('funfair-cans', 0, 0, { spawned: true, gx: counter.gx + 1.2, gy: counter.gy + 0.1, gz: COUNTER_H }); status.textContent += ' A star appeared at the booth! ⭐'; }
+        api.earn(10); if (!api.starFound('funfair-cans')) { api.addStar('funfair-cans', 0, 0, { spawned: true, gx: counter.gx + 1.2, gy: counter.gy + 0.1, gz: COUNTER_H }); status.textContent += ' A star appeared at the booth! ⭐'; }
         return;
       }
       if (!balls) { over = true; draw(hit); status.textContent = `${6 - left} cans down — out of balls! Try again 🔄`; return; }

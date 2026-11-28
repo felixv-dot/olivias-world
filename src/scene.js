@@ -8,6 +8,8 @@ import { renderPet, PET_ANIM } from './pets.js';
 import { proj, unproj } from './iso.js';
 import { el, topBar, rainLayer, snowLayer, refreshStars, CLIMATES, rotateHint } from './ui.js';
 import { sfx } from './sfx.js';
+import { earn, stampPlace, befriend, feedReward } from './economy.js';
+import { takePhoto } from './camera.js';
 
 const H = 900;
 
@@ -23,6 +25,9 @@ export function sceneScreen(app, ctx, def) {
     onWeather: climate ? () => onWeather() : null,
     climate: climate || undefined,
     onChars: () => ctx.go('roster', { back: ['scene', { id: def.id }] }),
+    onShop: () => ctx.go('shop', { back: ['scene', { id: def.id }] }),
+    onAlbum: () => ctx.go('album', { back: ['scene', { id: def.id }] }),
+    onCamera: () => takePhoto(api, def, { scene, bg, items, W, H, flashIn: wrap, view: viewCenter }),
   }));
   const wrap = el('div', 'scene-wrap');
   const scene = el('div', 'scene');
@@ -272,7 +277,8 @@ export function sceneScreen(app, ctx, def) {
       onTap: (i) => {
         if (def.onCharacterTap?.(api, i)) return;
         i.anim.happy();
-        if (c.say) bubble(i.x + i.w / 2, i.y - 6, c.say[Math.floor(Math.random() * c.say.length)]);
+        if (c.say && befriend(def.id + ':' + c.id)) { bubble(i.x + i.w / 2, i.y - 6, 'New friend sticker! 📖'); coinFloat(5, i.x + i.w / 2, i.y - 70); }
+        else if (c.say) bubble(i.x + i.w / 2, i.y - 6, c.say[Math.floor(Math.random() * c.say.length)]);
         else if (c.charId) {
           const ch = getChar(c.charId);
           if (pet) { sfx.boing(); bubble(i.x + i.w / 2, i.y - 6, `${ch?.name || 'Pet'} ${{ cat: '🐱 Meow!', dog: '🐶 Woof!', bunny: '🐰 *hop*', hamster: '🐹 Squeak!', fox: '🦊 Yip!' }[ch?.look.type] || '💜'}`); }
@@ -305,6 +311,8 @@ export function sceneScreen(app, ctx, def) {
     remove(it);
     sfx.yum();
     react(who, text, glyphs);
+    const got = feedReward();
+    if (got) coinFloat(got, who.x + who.w / 2, who.y - 60);
   }
 
   // ---------- effects ----------
@@ -328,6 +336,9 @@ export function sceneScreen(app, ctx, def) {
       later(() => s.remove(), 900);
     }
   }
+  // Floating "+10 🪙" over the scene. coins() also adds them to your purse.
+  function coinFloat(n, x, y) { effect(x, Math.max(60, y), 'coin-float', `+${n} 🪙`, 1400); }
+  function coins(n, x = viewCenter(), y = 200) { earn(n); coinFloat(n, x, y); sfx.star?.(); }
   function effect(x, y, cls, html, ms = 1200) {
     const e = el('div', 'fx ' + cls, html);
     e.style.left = x + 'px';
@@ -353,6 +364,7 @@ export function sceneScreen(app, ctx, def) {
     sfx.star();
     sparkle(cx, cy);
     bubble(cx, cy - 50, 'You found a star! ⭐');
+    coins(20, cx, cy - 120);
     it.el.classList.add('collect');
     later(() => remove(it), 600);
   }
@@ -378,6 +390,7 @@ export function sceneScreen(app, ctx, def) {
   const api = {
     get: (id) => items.get(id), items, add, remove, setArt, place, bubble, sparkle, effect, center, inside, later,
     addStar, starFound: (id) => state.stars.includes(id),
+    earn: coins, redrawBg: drawBg, scale: () => scale,
     react, eat, setLook, modal, sfx, characters,
     avatar: () => items.get('avatar'),
     uid: (p) => `${p}-${++spawnN}`,
@@ -405,7 +418,20 @@ export function sceneScreen(app, ctx, def) {
     });
   }
   def.init?.(api);
-  window.__owApi = api; // handy for testing in the console
+  window.__owApi = api;
+  // First visit to a real place (not a planet map): a stamp for the album.
+  if (!def.isMap && stampPlace(def.id)) later(() => { bubble(viewCenter(), 170, 'New stamp in your album! 📖'); coinFloat(10, viewCenter(), 120); }, 700);
+  // Extra buttons a place can offer (e.g. Decorate in your room).
+  if (def.tools?.length) {
+    const bar = el('div', 'scene-tools');
+    for (const t of def.tools) {
+      const b = el('button', 'btn tool-btn', t.label);
+      b.onclick = () => t.onClick(api, { root, wrap, ctx });
+      bar.append(b);
+      if (t.param && ctx.params[t.param]) later(() => t.onClick(api, { root, wrap, ctx }), 300);
+    }
+    wrap.append(bar);
+  } // handy for testing in the console
 
   return {
     destroy: () => {

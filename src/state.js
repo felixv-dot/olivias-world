@@ -8,6 +8,20 @@ const OLD_LOOK_KEY = 'ow-anime-avatar-v1';
 // `activeId` is the kid you play as; others with `travel: true` come along into places.
 const fresh = () => ({ chars: [], activeId: null, stars: [], weather: 'sun', winterWeather: 'snow', pos: {}, castle: 0, snowman: 0 });
 
+// Coins, owned things and the album (see economy.js). Older saves get a welcome purse.
+function economyDefaults(s) {
+  if (typeof s.coins !== 'number') s.coins = 100 + (s.stars?.length || 0) * 20;
+  s.inv ||= {};
+  s.walls ||= ['default'];
+  s.floors ||= ['default'];
+  s.home ||= { wall: 'default', floor: 'default', placed: [] };
+  s.stamps ||= [];
+  s.friends ||= [];
+  s.photos ||= [];
+  s.daily ||= { day: '', fed: 0 };
+  return s;
+}
+
 function normalize(raw) {
   const s = { ...fresh(), ...(raw || {}) };
   if (!s.chars.length && s.look) {
@@ -15,7 +29,7 @@ function normalize(raw) {
     s.activeId = 'c1';
   }
   delete s.look;
-  return s;
+  return economyDefaults(s);
 }
 
 function readLocal(key) {
@@ -60,7 +74,7 @@ export function save() {
 export function resetGame() {
   const keep = { muted: state.muted, hideInstallTip: state.hideInstallTip };
   for (const k of Object.keys(state)) delete state[k];
-  Object.assign(state, fresh(), keep);
+  Object.assign(state, economyDefaults(fresh()), keep);
   save();
 }
 

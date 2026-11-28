@@ -187,7 +187,7 @@ function ticTacToe(api, table) {
       over = true; draw(); status.textContent = msg;
       if (won) {
         api.sfx.win();
-        if (!api.starFound('games-ttt')) { api.addStar('games-ttt', 0, 0, { spawned: true, gx: table.gx + 0.6, gy: table.gy + 0.6, gz: table.def.surface }); status.textContent += ' A star appeared on the table! ⭐'; }
+        api.earn(10); if (!api.starFound('games-ttt')) { api.addStar('games-ttt', 0, 0, { spawned: true, gx: table.gx + 0.6, gy: table.gy + 0.6, gz: table.def.surface }); status.textContent += ' A star appeared on the table! ⭐'; }
       }
     }
     card.querySelector('.m-again').onclick = () => { b = Array(9).fill(''); over = false; status.textContent = 'You are ⭐ — get three in a row!'; draw(); };
@@ -229,7 +229,7 @@ function memory(api, table) {
         found.add(a); found.add(b2); open = []; api.sfx.pop(); draw();
         if (found.size === deck.length) {
           status.textContent = `All pairs in ${moves} moves! 🎉`; api.sfx.win();
-          if (!api.starFound('games-memory')) { api.addStar('games-memory', 0, 0, { spawned: true, gx: table.gx + 0.6, gy: table.gy + 0.6, gz: table.def.surface }); status.textContent += ' A star appeared! ⭐'; }
+          api.earn(10); if (!api.starFound('games-memory')) { api.addStar('games-memory', 0, 0, { spawned: true, gx: table.gx + 0.6, gy: table.gy + 0.6, gz: table.def.surface }); status.textContent += ' A star appeared! ⭐'; }
         }
       } else {
         lock = true;

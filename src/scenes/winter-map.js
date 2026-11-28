@@ -96,7 +96,7 @@ const goTo = (id) => (it, api) => { it.el.classList.add('press'); setTimeout(() 
 const place = (id, x, y, w, h, art) => ({ id, x, y, w, h, drag: false, cls: 'place', art, onTap: goTo(id) });
 
 export const WINTER_MAP = {
-  id: 'winter', width: WW, startX: 760, title: 'Winter Planet ❄️', backLabel: 'Galaxy', back: ['galaxy'], weather: CLIMATES.winter, outdoor: true, noAvatar: true,
+  id: 'winter', isMap: true, width: WW, startX: 760, title: 'Winter Planet ❄️', backLabel: 'Galaxy', back: ['galaxy'], weather: CLIMATES.winter, outdoor: true, noAvatar: true,
   frame: (w) => `linear-gradient(${w === 'snow' ? '#B0B8D0' : '#A6D4F4'} 50%, #F4F8FF 50%)`,
   bg,
   items: [
