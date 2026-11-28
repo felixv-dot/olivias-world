@@ -10,6 +10,7 @@ import { el, topBar, rainLayer, snowLayer, refreshStars, CLIMATES, rotateHint } 
 import { sfx } from './sfx.js';
 import { earn, stampPlace, befriend, feedReward } from './economy.js';
 import { takePhoto } from './camera.js';
+import * as story from './story.js';
 
 const H = 900;
 
@@ -27,6 +28,7 @@ export function sceneScreen(app, ctx, def) {
     onChars: () => ctx.go('roster', { back: ['scene', { id: def.id }] }),
     onShop: () => ctx.go('shop', { back: ['scene', { id: def.id }] }),
     onAlbum: () => ctx.go('album', { back: ['scene', { id: def.id }] }),
+    onJournal: () => ctx.go('journal', { back: ['scene', { id: def.id }] }),
     onCamera: () => takePhoto(api, def, { scene, bg, items, W, H, flashIn: wrap, view: viewCenter }),
   }));
   const wrap = el('div', 'scene-wrap');
@@ -245,14 +247,23 @@ export function sceneScreen(app, ctx, def) {
           if (it.iso && start.moved && it.def.small) { const s2 = surfaceUnder(it); if (s2) { it.on = s2; it.gz = s2.def.surface; } }
           place(it);
         }
-        if (!start.moved) { if (it.def.onTap) { sfx.tap(); it.def.onTap(it, api); } return; }
+        if (!start.moved) {
+          if (!it.def.character && story.onItemTap(api, def.id, it)) { sfx.tap(); return; }
+          if (it.def.onTap) { sfx.tap(); it.def.onTap(it, api); }
+          return;
+        }
         if (!canDrag) return;
         sfx.drop();
         if (!it.spawned && !it.def.star && !it.def.wear) { saved[it.id] = it.iso ? [+it.gx.toFixed(2), +it.gy.toFixed(2), it.gz || 0] : [Math.round(it.x), Math.round(it.y)]; save(); }
         if (it.def.character) { def.onCharacterDrop?.(api, it); return; }
         if (it.def.onGive || it.def.wear) {
           const who = characters().find((c) => inside(center(it), c, 10));
-          if (who) { it.def.wear ? wear(it, who) : it.def.onGive(it, api, who); return; }
+          if (who) {
+            const kind = it.def.wear ? it.def.wear[1] : it.id.replace(/-\d+$/, '');
+            it.def.wear ? wear(it, who) : it.def.onGive(it, api, who);
+            story.onGive(api, def.id, who.id, kind);
+            return;
+          }
         }
         it.def.onDrop?.(it, api);
       };
@@ -277,7 +288,10 @@ export function sceneScreen(app, ctx, def) {
       onTap: (i) => {
         if (def.onCharacterTap?.(api, i)) return;
         i.anim.happy();
-        if (c.say && befriend(def.id + ':' + c.id)) { bubble(i.x + i.w / 2, i.y - 6, 'New friend sticker! 📖'); coinFloat(5, i.x + i.w / 2, i.y - 70); }
+        const newFriend = c.say && befriend(def.id + ':' + c.id);
+        if (newFriend) coinFloat(5, i.x + i.w / 2, i.y - 70);
+        if (story.onTalk(api, def.id, c.id)) return;
+        if (newFriend) bubble(i.x + i.w / 2, i.y - 6, 'New friend sticker! 📖');
         else if (c.say) bubble(i.x + i.w / 2, i.y - 6, c.say[Math.floor(Math.random() * c.say.length)]);
         else if (c.charId) {
           const ch = getChar(c.charId);
@@ -390,7 +404,7 @@ export function sceneScreen(app, ctx, def) {
   const api = {
     get: (id) => items.get(id), items, add, remove, setArt, place, bubble, sparkle, effect, center, inside, later,
     addStar, starFound: (id) => state.stars.includes(id),
-    earn: coins, redrawBg: drawBg, scale: () => scale,
+    earn: coins, redrawBg: drawBg, scale: () => scale, root,
     react, eat, setLook, modal, sfx, characters,
     avatar: () => items.get('avatar'),
     uid: (p) => `${p}-${++spawnN}`,
@@ -421,6 +435,7 @@ export function sceneScreen(app, ctx, def) {
   window.__owApi = api;
   // First visit to a real place (not a planet map): a stamp for the album.
   if (!def.isMap && stampPlace(def.id)) later(() => { bubble(viewCenter(), 170, 'New stamp in your album! 📖'); coinFloat(10, viewCenter(), 120); }, 700);
+  story.enterScene(api, def);
   // Extra buttons a place can offer (e.g. Decorate in your room).
   if (def.tools?.length) {
     const bar = el('div', 'scene-tools');

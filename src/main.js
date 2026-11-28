@@ -10,6 +10,7 @@ import { SCENES } from './scenes/index.js';
 import { setupMobile } from './mobile.js';
 import { shopScreen } from './shop.js';
 import { albumScreen } from './album.js';
+import { journalScreen } from './journal.js';
 
 setupMobile();
 
@@ -23,6 +24,7 @@ const SCREENS = {
   galaxy: galaxyScreen,
   shop: shopScreen,
   album: albumScreen,
+  journal: journalScreen,
   scene: (root, ctx) => sceneScreen(root, ctx, SCENES[ctx.params.id]),
 };
 

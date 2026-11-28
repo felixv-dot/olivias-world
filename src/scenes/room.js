@@ -180,7 +180,9 @@ export const ROOM = {
     W('shelf', 'L', 3.0, 190, 1.2, 18, (it, sp) => `<rect y="12" width="${sp.len}" height="8" rx="2" fill="${WOOD}" ${line}/><path d="M14 12 v-16 h14 v16 M40 12 q0 -24 12 -24 q12 0 12 24" fill="${TEAL}" ${line}/>`),
 
     I('rug', 2.4, 2.2, 3, 2.6, rug, { floor: true }),
-    I('bookshelf', 0, 0.9, 0.7, 2, bookshelf),
+    I('bookshelf', 0, 0.9, 0.7, 2, bookshelf, {
+      // once the secret code was found, the bookcase is the way up to the Secret Attic
+      onTap: (it, api) => { const q = api.state.story?.q?.attic; if (q === 'done' || q >= 4) { api.sfx.click(); api.go('scene', { id: 'attic' }); } } }),
     I('flamp', 4.85, 0.1, 0.6, 0.6, floorLamp, { data: { on: true }, onTap: (it, api) => { it.data.on = !it.data.on; api.setArt(it); api.sfx.click(); } }),
     I('bed', 0, 4.6, 3, 2, bed, { surface: 52 }),
     I('nightstand', 0.05, 3.5, 1, 1, nightstand, { surface: 60 }),

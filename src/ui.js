@@ -43,7 +43,7 @@ export function setWeather(key, w) {
   save();
 }
 
-export function topBar({ title, onBack, backLabel = 'Back', onWeather, climate = CLIMATES.sunny, onChars, onShop, onAlbum, onCamera }) {
+export function topBar({ title, onBack, backLabel = 'Back', onWeather, climate = CLIMATES.sunny, onChars, onShop, onAlbum, onCamera, onJournal }) {
   const bar = el('div', 'topbar');
   const back = el('button', 'tb-btn back', `◀<span class="lbl"> ${backLabel}</span>`);
   back.setAttribute('aria-label', 'Back to ' + backLabel);
@@ -59,7 +59,7 @@ export function topBar({ title, onBack, backLabel = 'Back', onWeather, climate =
     chars.onclick = onChars;
     right.append(chars);
   }
-  const extra = [[onCamera, '📷', 'Take a photo', 'camera'], [onAlbum, '📖', 'Album', 'album'], [onShop, '🛍️', 'Shop', 'shop']];
+  const extra = [[onCamera, '📷', 'Take a photo', 'camera'], [onJournal, '📜', 'Quest journal', 'journal'], [onAlbum, '📖', 'Album', 'album'], [onShop, '🛍️', 'Shop', 'shop']];
   for (const [fn, icon, label, cls] of extra) {
     if (!fn) continue;
     const b = el('button', 'tb-btn icon ' + cls, icon);

@@ -102,7 +102,10 @@ export function galaxyScreen(app, ctx) {
   const albumBtn = el('button', 'btn alt icon-btn', '📖');
   albumBtn.setAttribute('aria-label', 'Album');
   albumBtn.onclick = () => ctx.go('album', { back: ['galaxy'] });
-  headRight.append(charsBtn, albumBtn, shopBtn, starBadge(), coinBadge(() => ctx.go('shop', { back: ['galaxy'] })), gear);
+  const journalBtn = el('button', 'btn alt icon-btn', '📜');
+  journalBtn.setAttribute('aria-label', 'Quest journal');
+  journalBtn.onclick = () => ctx.go('journal', { back: ['galaxy'] });
+  headRight.append(charsBtn, journalBtn, albumBtn, shopBtn, starBadge(), coinBadge(() => ctx.go('shop', { back: ['galaxy'] })), gear);
   head.append(el('div', 'logo', "Olivia's World"), headRight);
   root.append(head, el('div', 'galaxy-title', 'Choose a planet'));
 
@@ -143,7 +146,7 @@ export function galaxyScreen(app, ctx) {
   const anim = animate(() => meAvatar.firstElementChild);
   meAvatar.onclick = () => anim.happy();
 
-  root.append(el('div', 'version', 'v2.0'));
+  root.append(el('div', 'version', 'v2.1'));
   // Daily gift: a present on the first visit of the day.
   setTimeout(() => {
     if (!root.isConnected) return;
